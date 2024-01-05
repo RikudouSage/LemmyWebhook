@@ -29,9 +29,13 @@ services:
     App\Service\InstallableSqlObjectManager:
         arguments:
             $connection: '@doctrine.dbal.lemmy_connection'
+    App\Service\ExpressionParser:
+        calls:
+            - registerProvider: ['@App\Service\StandardExpressionParserProvider']
     app.expression_parser.enhanced:
         class: App\Service\ExpressionParser
         calls:
+            - registerProvider: ['@App\Service\StandardExpressionParserProvider']
             - registerProvider: ['@App\Service\EnhancedExpressionParserProvider']
     App\MessageHandler\TriggerCallbackHandler:
         arguments:

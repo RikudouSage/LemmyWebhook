@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 #[ORM\Entity(repositoryClass: WebhookRepository::class)]
 #[ORM\Table(name: 'webhooks')]
+#[ORM\Index(fields: ['objectType'])]
+#[ORM\Index(fields: ['operation'])]
 class Webhook
 {
     #[ORM\Id]
