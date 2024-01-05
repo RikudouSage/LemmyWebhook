@@ -1,0 +1,53 @@
+name: Publish docker
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract Version Name
+        id: extract_version
+        uses: actions/github-script@v6
+        with:
+          result-encoding: string
+          script: |
+            if (context.payload.ref.startsWith('refs/tags/')) {
+              return context.payload.ref.replace(/refs\/tags\/v/, '');
+            }
+            return 'dev';
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup php dependencies
+        run: composer install --no-dev --no-scripts
+      - name: Build docker
+        env:
+          VERSION: ${{ steps.extract_version.outputs.result }}
+        run: docker build -f docker/Dockerfile -t ghcr.io/rikudousage/lemmy-webhook:$VERSION --label "org.opencontainers.image.source=https://github.com/RikudouSage/LemmyWebhook/" --label "org.opencontainers.image.licenses=MIT" .
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push to docker
+        env:
+          VERSION: ${{ steps.extract_version.outputs.result }}
+        run: docker push ghcr.io/rikudousage/lemmy-schedule:$VERSION
+      - name: Push latest to docker
+        if: steps.extract_version.outputs.result != 'dev'
+        env:
+          VERSION: ${{ steps.extract_version.outputs.result }}
+        run: |
+          docker tag ghcr.io/rikudousage/lemmy-schedule:$VERSION ghcr.io/rikudousage/lemmy-schedule:latest
+          docker push ghcr.io/rikudousage/lemmy-schedule:latest

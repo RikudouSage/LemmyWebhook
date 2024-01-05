@@ -22,3 +22,20 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    PDO:
+        class: PDO
+        factory: ['@doctrine.dbal.lemmy_connection', 'getNativeConnection']
+    App\Service\InstallableSqlObjectManager:
+        arguments:
+            $connection: '@doctrine.dbal.lemmy_connection'
+    app.expression_parser.enhanced:
+        class: App\Service\ExpressionParser
+        calls:
+            - registerProvider: ['@App\Service\EnhancedExpressionParserProvider']
+    App\MessageHandler\TriggerCallbackHandler:
+        arguments:
+            $expressionParser: '@app.expression_parser.enhanced'
+    App\Service\EnhancedExpressionParserProvider:
+        arguments:
+            $connection: '@doctrine.dbal.lemmy_connection'
