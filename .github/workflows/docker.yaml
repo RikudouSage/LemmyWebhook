@@ -43,11 +43,11 @@ jobs:
       - name: Push to docker
         env:
           VERSION: ${{ steps.extract_version.outputs.result }}
-        run: docker push ghcr.io/rikudousage/lemmy-schedule:$VERSION
+        run: docker push ghcr.io/rikudousage/lemmy-webhook:$VERSION
       - name: Push latest to docker
         if: steps.extract_version.outputs.result != 'dev'
         env:
           VERSION: ${{ steps.extract_version.outputs.result }}
         run: |
-          docker tag ghcr.io/rikudousage/lemmy-schedule:$VERSION ghcr.io/rikudousage/lemmy-schedule:latest
-          docker push ghcr.io/rikudousage/lemmy-schedule:latest
+          docker tag ghcr.io/rikudousage/lemmy-webhook:$VERSION ghcr.io/rikudousage/lemmy-webhook:latest
+          docker push ghcr.io/rikudousage/lemmy-webhook:latest
