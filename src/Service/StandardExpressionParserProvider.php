@@ -20,6 +20,13 @@ final readonly class StandardExpressionParserProvider implements ExpressionFunct
                     return str_contains($haystack, $needle);
                 }
             ),
+            new ExpressionFunction(
+                'lowercase',
+                fn () => throw new LogicException('This function cannot be compiled.'),
+                function (array $context, string $text): string {
+                    return mb_strtolower($text);
+                },
+            ),
         ];
     }
 }
