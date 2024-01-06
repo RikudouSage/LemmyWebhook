@@ -14,6 +14,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\ExpressionLanguage\SyntaxError;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsCommand('app:postgres-webhook-listener')]
@@ -82,10 +83,15 @@ final class PostgresWebhookListenerCommand extends Command
                 }
 
                 $filterExpression = $webhook->getFilterExpression();
-                if ($filterExpression !== null && !$this->expressionParser->evaluate($filterExpression, ['data' => $data])) {
-                    if ($output->isVerbose()) {
-                        $io->comment("The filter expression did not evaluate to true, skipping webhook {$i}");
+                try {
+                    if ($filterExpression !== null && !$this->expressionParser->evaluate($filterExpression, ['data' => $data])) {
+                        if ($output->isVerbose()) {
+                            $io->comment("The filter expression did not evaluate to true, skipping webhook {$i}");
+                        }
+                        continue;
                     }
+                } catch (SyntaxError) {
+                    $io->error("There's a syntax error in filter expression for webhook with ID {$webhook->getId()}");
                     continue;
                 }
 
