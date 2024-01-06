@@ -151,6 +151,10 @@ it will be first filtered based on `filter_expression` on the main thread and th
 
 `data.data.creatorId === 2`
 
+#### Contains a specific user mention (case-insensitive)
+
+`string_contains(lowercase(data.data.content), "@chatgpt@lemmings.world")` (I use that one for my ChatGPT bot)
+
 ### Example body expressions
 
 #### Pass the whole object
@@ -170,6 +174,10 @@ it will be first filtered based on `filter_expression` on the main thread and th
     instance: instance(community(data.data.communityId).instanceId).domain
 }
 ```
+
+### Comment ID and a custom string
+
+`{commentId: data.data.id, mentionedBot: "ChatGPT@lemmings.world"}` (I use that one for my ChatGPT bot)
 
 ### Example enhanced filters
 
