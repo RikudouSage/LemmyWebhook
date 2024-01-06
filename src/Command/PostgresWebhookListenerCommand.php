@@ -68,12 +68,12 @@ final class PostgresWebhookListenerCommand extends Command
                 continue;
             }
 
-            if ($output->isVerbose()) {
+            if ($output->isVeryVerbose()) {
                 $io->comment(sprintf("Found %d webhooks for '%s' on '%s'", count($webhooks), $data->operation->value, $data->table));
             }
             $i = 1;
             foreach ($webhooks as $webhook) {
-                if ($output->isVerbose()) {
+                if ($output->isVeryVerbose()) {
                     $io->comment("Processing webhook #{$i}");
                 }
 
@@ -85,7 +85,7 @@ final class PostgresWebhookListenerCommand extends Command
                 $filterExpression = $webhook->getFilterExpression();
                 try {
                     if ($filterExpression !== null && !$this->expressionParser->evaluate($filterExpression, ['data' => $data])) {
-                        if ($output->isVerbose()) {
+                        if ($output->isVeryVerbose()) {
                             $io->comment("The filter expression did not evaluate to true, skipping webhook {$i}");
                         }
                         continue;
@@ -97,7 +97,7 @@ final class PostgresWebhookListenerCommand extends Command
 
                 $this->messageBus->dispatch(new TriggerCallbackMessage($webhook, $data));
                 if ($output->isVerbose()) {
-                    $io->comment('Sending webhook to message bus');
+                    $io->comment("Sending webhook with id '{$webhook->getId()}' to message bus");
                 }
 
                 ++$i;
