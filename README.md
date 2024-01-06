@@ -18,6 +18,7 @@ Add efficient webhook support to your Lemmy instance. Especially useful for bots
     * [Title, community and instance](#title-community-and-instance)
     * [Example enhanced filters](#example-enhanced-filters)
       * [Check whether the comment is posted to a community on your instance](#check-whether-the-comment-is-posted-to-a-community-on-your-instance)
+  * [Full example](#full-example)
 <!-- TOC -->
 
 ## Installation
