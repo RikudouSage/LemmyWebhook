@@ -14,7 +14,7 @@ final readonly class StandardExpressionParserProvider implements ExpressionFunct
     {
         return [
             new ExpressionFunction(
-                'contains',
+                'string_contains',
                 fn () => throw new LogicException('This function cannot be compiled.'),
                 function (array $context, string $haystack, string $needle): bool {
                     return str_contains($haystack, $needle);

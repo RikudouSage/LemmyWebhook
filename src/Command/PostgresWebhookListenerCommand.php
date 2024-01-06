@@ -52,10 +52,12 @@ final class PostgresWebhookListenerCommand extends Command
                 ...$this->webhookRepository->findBy([
                     'objectType' => $data->table,
                     'operation' => $data->operation,
+                    'enabled' => true,
                 ]),
                 ...$this->webhookRepository->findBy([
                     'objectType' => $data->table,
                     'operation' => null,
+                    'enabled' => true,
                 ]),
             ];
             if (!count($webhooks)) {

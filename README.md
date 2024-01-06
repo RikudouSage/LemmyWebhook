@@ -117,8 +117,8 @@ a few simple functions.
 
 Simple expressions have access to these functions:
 
-- `contains(stringToSearchIn, stringToSearchFor)` - returns true if the `stringToSearchIn` contains `stringToSearchFor`
-  - example filter expression: `contains(data.data.content, '@my_bot@my_instance')` - returns true if the comment text contains the text `@my_bot@my_instance`, basically only reacting to a mention of a bot 
+- `string_contains(stringToSearchIn, stringToSearchFor)` - returns true if the `stringToSearchIn` contains `stringToSearchFor`
+  - example filter expression: `string_contains(data.data.content, '@my_bot@my_instance')` - returns true if the comment text contains the text `@my_bot@my_instance`, basically only reacting to a mention of a bot 
 
 Enhanced expressions, in addition to the above, have access to these functions:
 

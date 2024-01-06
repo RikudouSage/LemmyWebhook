@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 #[ORM\Table(name: 'webhooks')]
 #[ORM\Index(fields: ['objectType'])]
 #[ORM\Index(fields: ['operation'])]
+#[ORM\Index(fields: ['enabled'])]
 class Webhook
 {
     #[ORM\Id]
@@ -44,6 +45,9 @@ class Webhook
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $enhancedFilter = null;
+
+    #[ORM\Column]
+    private bool $enabled = true;
 
     public function getId(): ?int
     {
@@ -142,6 +146,18 @@ class Webhook
     public function setEnhancedFilter(?string $enhancedFilter): static
     {
         $this->enhancedFilter = $enhancedFilter;
+
+        return $this;
+    }
+
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    public function setEnabled(bool $enabled): static
+    {
+        $this->enabled = $enabled;
 
         return $this;
     }
