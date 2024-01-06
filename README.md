@@ -36,8 +36,8 @@ services:
   webhooks:
     image: ghcr.io/rikudousage/lemmy-webhook:latest
     environment:
-      - LEMMY_HOST=postgres # make it the name of your postgres container
-      - REDIS_HOST=redis # make it the name of your redis container (defined above)
+      - LEMMY_HOST=postgres # the hostname of the postgres database
+      - REDIS_HOST=redis # the hostname of the redis server, you can use the above redis container if you define it as part of this stack
       - LEMMY_PASSWORD=superSecr3t # the password to the postgres database
     volumes:
       - ./volumes/database:/opt/database # bind a directory where the SQLite database will be created
