@@ -9,4 +9,6 @@ final readonly class InstanceData
 {
     public int $id;
     public string $domain;
+    public string $software;
+    public string $version;
 }

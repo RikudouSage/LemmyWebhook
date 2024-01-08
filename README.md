@@ -12,10 +12,12 @@ Add efficient webhook support to your Lemmy instance. Especially useful for bots
       * [Only local users](#only-local-users)
       * [Only non-local users](#only-non-local-users)
       * [Only specific user](#only-specific-user)
+      * [Contains a specific user mention (case-insensitive)](#contains-a-specific-user-mention-case-insensitive)
     * [Example body expressions](#example-body-expressions)
       * [Pass the whole object](#pass-the-whole-object)
       * [Post title and whether the post contains URL](#post-title-and-whether-the-post-contains-url)
     * [Title, community and instance](#title-community-and-instance)
+    * [Comment ID and a custom string](#comment-id-and-a-custom-string)
     * [Example enhanced filters](#example-enhanced-filters)
       * [Check whether the comment is posted to a community on your instance](#check-whether-the-comment-is-posted-to-a-community-on-your-instance)
   * [Full example](#full-example)
@@ -58,6 +60,7 @@ Don't fret, the table is quite simple and consists of these fields:
 - `object_type` - the type of object this webhook is interested in, currently:
   - `post`
   - `comment`
+  - `instance`
 - `operation` (optional) - the kind of operation this webhook is interested in, can be `INSERT`, `UPDATE`, `DELETE` (taken from the [DatabaseOperation](src/Enum/DatabaseOperation.php) enum)
 - `headers` (optional) - a JSON object with keys as header names and values as header values
 - `enhanced_filter` (optional) - an expression that must evaluate to true if this webhook is to run, more on expressions below
@@ -109,6 +112,7 @@ based on what you're being notified about. Here's a list of all `table` values c
 
 - `post` - [PostData](src/Dto/RawData/PostData.php)
 - `comment` - [CommentData](src/Dto/RawData/CommentData.php)
+- `instance` - [InstanceData]()
 
 ### Basic vs enhanced expressions
 

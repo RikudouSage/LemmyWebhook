@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Dto\RawData\CommunityData;
 use App\Dto\RawData\InstanceData;
 use App\Dto\RawData\PostData;
+use App\SqlObject\Instance\InstanceCreatedTrigger;
 use App\SqlObject\Post\PostCreatedTrigger;
 use Doctrine\DBAL\Connection;
 use LogicException;
@@ -17,6 +18,7 @@ final readonly class EnhancedExpressionParserProvider implements ExpressionFunct
         private Connection $connection,
         private RawWebhookParser $webhookParser,
         private PostCreatedTrigger $postTrigger,
+        private InstanceCreatedTrigger $instanceCreatedTrigger,
     ) {
     }
 
@@ -39,7 +41,8 @@ final readonly class EnhancedExpressionParserProvider implements ExpressionFunct
                 'instance',
                 fn () => throw new LogicException('This function cannot be compiled.'),
                 function (array $context, int $instanceId): ?InstanceData {
-                    $data = $this->connection->executeQuery('select id, domain from instance where id = :id', ['id' => $instanceId])->fetchAssociative();
+                    $fields = implode(',', $this->instanceCreatedTrigger->getFields());
+                    $data = $this->connection->executeQuery("select {$fields} from instance where id = :id", ['id' => $instanceId])->fetchAssociative();
                     if ($data === false) {
                         return null;
                     }
