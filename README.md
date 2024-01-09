@@ -61,6 +61,7 @@ Don't fret, the table is quite simple and consists of these fields:
   - `post`
   - `comment`
   - `instance`
+  - `private_message` (only `INSERT` operation)
 - `operation` (optional) - the kind of operation this webhook is interested in, can be `INSERT`, `UPDATE`, `DELETE` (taken from the [DatabaseOperation](src/Enum/DatabaseOperation.php) enum)
 - `headers` (optional) - a JSON object with keys as header names and values as header values
 - `enhanced_filter` (optional) - an expression that must evaluate to true if this webhook is to run, more on expressions below
@@ -112,7 +113,8 @@ based on what you're being notified about. Here's a list of all `table` values c
 
 - `post` - [PostData](src/Dto/RawData/PostData.php)
 - `comment` - [CommentData](src/Dto/RawData/CommentData.php)
-- `instance` - [InstanceData]()
+- `instance` - [InstanceData](src/Dto/RawData/InstanceData.php)
+- `private_message` - [PrivateMessageData](src/Dto/RawData/PrivateMessageData.php)
 
 ### Basic vs enhanced expressions
 
