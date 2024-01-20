@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Webhook;
 use App\Message\TriggerCallbackMessage;
 use App\Repository\WebhookRepository;
+use App\Service\DuplicateChecker;
 use App\Service\ExpressionParser;
 use App\Service\RawWebhookParser;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,6 +28,7 @@ final class PostgresWebhookListenerCommand extends Command
         private readonly ExpressionParser $expressionParser,
         private readonly MessageBusInterface $messageBus,
         private readonly EntityManagerInterface $entityManager,
+        private readonly DuplicateChecker $duplicateChecker,
     )
     {
         parent::__construct();
@@ -47,6 +49,11 @@ final class PostgresWebhookListenerCommand extends Command
             }
             $payload = json_decode($result['payload'], true);
             $data = $this->parser->parse($payload);
+
+            if ($this->duplicateChecker->isDuplicate($data)) {
+                continue;
+            }
+            $this->duplicateChecker->markAsProcessed($data);
 
             /** @var Webhook[] $webhooks */
             $webhooks = [
