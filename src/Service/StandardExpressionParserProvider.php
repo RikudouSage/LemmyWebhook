@@ -27,6 +27,13 @@ final readonly class StandardExpressionParserProvider implements ExpressionFunct
                     return mb_strtolower($text);
                 },
             ),
+            new ExpressionFunction(
+                'transliterate',
+                fn () => throw new LogicException('This function cannot be compiled.'),
+                function (array $context, string $text): string {
+                    return transliterator_transliterate('Any-Latin; Latin-ASCII;', $text);
+                },
+            ),
         ];
     }
 }
