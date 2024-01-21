@@ -133,6 +133,7 @@ Simple expressions have access to these functions:
 - `lowercase(text)` - returns the string converted to lowercase
 - `transliterate(text)` - returns the string transliterated to standard latin characters:
   - example: `transliterate("Hélľö, hów ärě ýöů?")` -> `Hello, how are you?`
+  - example: `transliterate("𝐻𝐞𝒍𝓁𝓸 𝔱𝕙𝖊𝗋𝚎!")` -> `Hello there!`
 
 Enhanced expressions, in addition to the above, have access to these functions:
 
