@@ -31,7 +31,7 @@ final readonly class StandardExpressionParserProvider implements ExpressionFunct
                 'transliterate',
                 fn () => throw new LogicException('This function cannot be compiled.'),
                 function (array $context, string $text): string {
-                    return transliterator_transliterate('Any-Latin; Latin-ASCII;', $text);
+                    return transliterator_transliterate('NFKC; Any-Latin; Latin-ASCII;', $text);
                 },
             ),
         ];
