@@ -9,7 +9,7 @@ final readonly class PostReportData
 {
     public int $id;
     public int $creatorId;
-    public int $commentId;
+    public int $postId;
     public string $originalPostName;
     public ?string $originalPostUrl;
     public ?string $originalPostBody;
