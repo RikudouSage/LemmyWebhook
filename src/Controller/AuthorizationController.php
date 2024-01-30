@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 #[Route('/auth')]
 final class AuthorizationController extends AbstractController
@@ -25,18 +26,21 @@ final class AuthorizationController extends AbstractController
     public function scopeList(
         #[TaggedIterator('app.raw_data_type')]
         iterable $types,
+        AuthorizationCheckerInterface $authorizationChecker,
     ): JsonResponse {
         $user = $this->getUser();
         assert($user instanceof User);
 
-        return new JsonResponse(array_map(function (object $type) use ($user) {
+        return new JsonResponse(array_map(function (object $type) use ($user, $authorizationChecker) {
             $reflection = new ReflectionObject($type);
             $attribute = $reflection->getAttributes(RawDataType::class)[0]->newInstance();
             assert($attribute instanceof RawDataType);
 
             return [
                 'scope' => $attribute->table,
-                'granted' => $user->findScopeByType($attribute->table)?->isGranted() ?? false,
+                'granted' => $authorizationChecker->isGranted('ROLE_ADMIN')
+                    ? true
+                    : ($user->findScopeByType($attribute->table)?->isGranted() ?? false),
             ];
         }, [...$types]));
     }
