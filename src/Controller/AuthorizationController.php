@@ -2,11 +2,14 @@
 
 namespace App\Controller;
 
+use App\Attribute\RawDataType;
 use App\Entity\Scope;
 use App\Entity\User;
 use App\Service\RawWebhookParser;
 use Doctrine\ORM\EntityManagerInterface;
+use ReflectionObject;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,6 +18,29 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/auth')]
 final class AuthorizationController extends AbstractController
 {
+    /**
+     * @param iterable<object> $types
+     */
+    #[Route('/scopes', name: 'app.authorization.scope_list', methods: [Request::METHOD_GET])]
+    public function scopeList(
+        #[TaggedIterator('app.raw_data_type')]
+        iterable $types,
+    ): JsonResponse {
+        $user = $this->getUser();
+        assert($user instanceof User);
+
+        return new JsonResponse(array_map(function (object $type) use ($user) {
+            $reflection = new ReflectionObject($type);
+            $attribute = $reflection->getAttributes(RawDataType::class)[0]->newInstance();
+            assert($attribute instanceof RawDataType);
+
+            return [
+                'scope' => $attribute->table,
+                'granted' => $user->findScopeByType($attribute->table)?->isGranted() ?? false,
+            ];
+        }, [...$types]));
+    }
+
     #[Route('/scope-request/{scope}', name: 'app.authorization.scope_request.create', methods: [Request::METHOD_POST])]
     public function createScopeRequest(
         string $scope,

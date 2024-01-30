@@ -146,6 +146,36 @@ paths:
                     type: string
                     example: "Invalid scope: 'invalid'"
 
+  /auth/scopes:
+    get:
+      summary: Returns list of scopes
+      description: Returns list of available scopes and whether the current user does have access to them or not
+      tags:
+        - Authorization
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    scope:
+                      type: string
+                      example: post
+                    granted:
+                      type: boolean
+                      example: true
+                example:
+                  - scope: post
+                    granted: true
+                  - scope: comment
+                    granted: false
+        401:
+          description: Unauthorized
+
 components:
   schemas:
     LoginRequest:
