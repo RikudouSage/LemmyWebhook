@@ -1,3 +1,4 @@
 /.env.local
 /database
 /.idea
+/doc
