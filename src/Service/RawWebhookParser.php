@@ -67,6 +67,16 @@ final readonly class RawWebhookParser
         return $object;
     }
 
+    public function isValidTable(string $table): bool
+    {
+        try {
+            $this->findTypeObjectClass($table);
+            return true;
+        } catch (LogicException) {
+            return false;
+        }
+    }
+
     /**
      * @return class-string<object>
      */

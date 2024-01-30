@@ -2,9 +2,12 @@
 
 namespace App\MessageHandler;
 
+use App\Message\CleanupExpiredTokensMessage;
 use App\Message\TriggerCallbackMessage;
 use App\Service\ExpressionParser;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[AsMessageHandler]
@@ -13,11 +16,18 @@ final readonly class TriggerCallbackHandler
     public function __construct(
         private HttpClientInterface $httpClient,
         private ExpressionParser $expressionParser,
+        private MessageBusInterface $messageBus,
     ) {
     }
 
     public function __invoke(TriggerCallbackMessage $message): void
     {
+        if (random_int(0, 100) === 50) {
+            $this->messageBus->dispatch(new CleanupExpiredTokensMessage(), [
+                new DispatchAfterCurrentBusStamp(),
+            ]);
+        }
+
         $webhook = $message->webhook;
         $data = $message->data;
 

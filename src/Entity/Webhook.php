@@ -8,8 +8,11 @@ use App\Repository\WebhookRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use JetBrains\PhpStorm\ExpectedValues;
+use Rikudou\JsonApiBundle\Attribute\ApiProperty;
+use Rikudou\JsonApiBundle\Attribute\ApiResource;
 use Symfony\Component\HttpFoundation\Request;
 
+#[ApiResource]
 #[ORM\Entity(repositoryClass: WebhookRepository::class)]
 #[ORM\Table(name: 'webhooks')]
 #[ORM\Index(fields: ['objectType'])]
@@ -22,32 +25,45 @@ class Webhook
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ApiProperty]
     #[ORM\Column(type: Types::TEXT)]
     private ?string $url = null;
 
+    #[ApiProperty(setter: 'setMethodAsString')]
     #[ORM\Column(length: 10, enumType: RequestMethod::class)]
     private RequestMethod $method = RequestMethod::Get;
 
+    #[ApiProperty]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $bodyExpression = null;
 
+    #[ApiProperty]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $filterExpression = null;
 
+    #[ApiProperty]
     #[ORM\Column(length: 180)]
     private ?string $objectType = null;
 
+    #[ApiProperty(setter: 'setOperationAsString')]
     #[ORM\Column(length: 180, nullable: true, enumType: DatabaseOperation::class)]
     private ?DatabaseOperation $operation = null;
 
+    #[ApiProperty(relation: false)]
     #[ORM\Column(nullable: true)]
     private ?array $headers = null;
 
+    #[ApiProperty]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $enhancedFilter = null;
 
+    #[ApiProperty]
     #[ORM\Column]
     private bool $enabled = true;
+
+    #[ApiProperty(relation: true)]
+    #[ORM\ManyToOne(inversedBy: 'webhooks')]
+    private ?User $user = null;
 
     public function getId(): ?int
     {
@@ -76,6 +92,11 @@ class Webhook
         $this->method = $method;
 
         return $this;
+    }
+
+    public function setMethodAsString(string $method): static
+    {
+        return $this->setMethod(RequestMethod::from($method));
     }
 
     public function getBodyExpression(): ?string
@@ -126,6 +147,15 @@ class Webhook
         return $this;
     }
 
+    public function setOperationAsString(?string $operation): static
+    {
+        if ($operation !== null) {
+            $operation = DatabaseOperation::from($operation);
+        }
+
+        return $this->setOperation($operation);
+    }
+
     public function getHeaders(): ?array
     {
         return $this->headers;
@@ -158,6 +188,18 @@ class Webhook
     public function setEnabled(bool $enabled): static
     {
         $this->enabled = $enabled;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }

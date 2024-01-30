@@ -1,0 +1,200 @@
+openapi: 3.0.0
+
+info:
+  title: Lemmy Webhooks API
+  version: 0.9.19
+
+security:
+  - ApiKey: []
+
+paths:
+  /auth/register:
+    post:
+      security: []
+      summary: Create an account (if enabled)
+      description: This endpoint can be used to create a new account if the admins enabled api registration.
+      tags:
+        - Authentication
+        - Authorization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        201:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Your account has been created, you must now wait for manual approval.
+        400:
+          description: Invalid scope provided
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "The scope is not valid: 'invalid_scope'"
+        404:
+          description: Registration not enabled
+
+  /auth/login:
+    post:
+      security: []
+      summary: Log in to your account
+      description: This endpoint is used for logging in using your username and password.
+      tags:
+        - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        400:
+          description: Invalid credentials or account not enabled
+
+  /auth/refresh:
+    post:
+      summary: Get a new access token from a refresh token
+      security: []
+      description: This endpoint returns a new access token and refresh token from an existing valid refresh token. The original refresh token is invalidated in the process.
+      tags:
+        - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        400:
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid token
+  /auth/scope-request/{scope}:
+    post:
+      summary: Ask for access to a scope
+      description: Ask for access to a scope, meaning you can create webhooks for given table.
+      tags:
+        - Authorization
+      parameters:
+        - name: scope
+          in: path
+          examples:
+            Post:
+              description: Ask for a `post` scope
+              value: post
+            Comment:
+              description: Ask for a `comment` scope
+              value: comment
+          schema:
+            type: string
+      responses:
+        200:
+          description: Request already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Request for scope 'post' is already pending approval.
+        201:
+          description: Scope request created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Successfully asked for scope 'post'. Please wait for manual review.
+        400:
+          description: Invalid scope
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid scope: 'invalid'"
+
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: my_username
+        password:
+          type: string
+          example: super_secure_pa$$word
+    RegisterRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: my_username
+        password:
+          type: string
+          example: super_secure_pa$$word
+        scopes:
+          type: array
+          description: Tables you want access to
+          example:
+            - comment
+            - post
+            - registration_application
+          items:
+            type: string
+    RefreshTokenRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          example: 30957d792b7c29bd9734bbd03d52f7dfc1531c63d94e0a85422b3297d5c7ffc96ec117eb00e5b835d387aeb23879b574993fd2935f4cb45c08f5665472e0e1811f37de1ac50fe0bf3aa71109968d5382b5b29a09de0dc7eac751
+    AuthenticationResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          example: dc24a93bf28408fbe47b51e4b8c09fd8109bcef2d6c5e7697d986c779cbd10c283601bb963e4439ab7290b6af0bbba5f77c2570e886777a3cbef48aa244a48f51733ad1b569c74457db49abb0c486d819239dd9559927753984f
+        expires:
+          type: string
+          format: datetime
+          example: 2024-01-30T15:51:37+01:00
+        refreshToken:
+          type: string
+          example: 30957d792b7c29bd9734bbd03d52f7dfc1531c63d94e0a85422b3297d5c7ffc96ec117eb00e5b835d387aeb23879b574993fd2935f4cb45c08f5665472e0e1811f37de1ac50fe0bf3aa71109968d5382b5b29a09de0dc7eac751
+  securitySchemes:
+    ApiKey:
+      type: http
+      scheme: bearer
