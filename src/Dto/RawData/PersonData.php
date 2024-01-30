@@ -19,7 +19,6 @@ final readonly class PersonData
     public ?string $banner;
     public bool $deleted;
     public ?string $matrixUserId;
-    public bool $admin;
     public bool $botAccount;
     public DateTimeInterface $banExpires;
     public int $instanceId;

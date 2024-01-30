@@ -25,7 +25,6 @@ abstract readonly class AbstractPersonTrigger extends AbstractTableTrigger
             'banner',
             'deleted',
             'matrix_user_id',
-            'admin',
             'bot_account',
             'ban_expires',
             'instance_id',
