@@ -41,6 +41,8 @@ services:
       - LEMMY_HOST=postgres # the hostname of the postgres database
       - REDIS_HOST=redis # the hostname of the redis server, you can use the above redis container if you define it as part of this stack
       - LEMMY_PASSWORD=superSecr3t # the password to the postgres database
+    ports:
+      - 8080:80 # you can skip this, if you don't use the management api
     volumes:
       - ./volumes/database:/opt/database # bind a directory where the SQLite database will be created
 ```
@@ -49,9 +51,9 @@ Afterwards, run `docker-compose up -d` and you're done!
 
 ## Usage
 
-Currently, there's no api to manage the webhooks; you must insert them directly into the SQLite database.
+You can either use the api, or insert webhooks directly into the database. You can read more on the api [at a separate readme](doc/api.md).
 
-Don't fret, the table is quite simple and consists of these fields:
+The table is quite simple and consists of these fields:
 
 - `url` - the URL of the webhook
 - `method` - can be `GET`, `POST`, `PATCH`, `DELETE`, `PUT` (taken from the [RequestMethod](src/Enum/RequestMethod.php) enum)

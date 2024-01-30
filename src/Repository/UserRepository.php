@@ -44,7 +44,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
     #[Override]
-    public function loadUserByIdentifier(string $identifier): ?UserInterface
+    public function loadUserByIdentifier(string $identifier): ?User
     {
         return $this->findOneBy([
             'username' => $identifier,
