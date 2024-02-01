@@ -4,6 +4,7 @@ namespace App\MessageHandler;
 
 use App\Message\CleanupExpiredTokensMessage;
 use App\Repository\AuthenticationTokenRepository;
+use App\Repository\RefreshTokenRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -13,6 +14,7 @@ final readonly class CleanupExpiredTokensHandler
 {
     public function __construct(
         private AuthenticationTokenRepository $authenticationTokenRepository,
+        private RefreshTokenRepository $refreshTokenRepository,
         private EntityManagerInterface $entityManager,
     ) {
     }
@@ -27,6 +29,14 @@ final readonly class CleanupExpiredTokensHandler
             }
             if ($authenticationToken->getValidUntil() < $now) {
                 $this->entityManager->remove($authenticationToken);
+            }
+        }
+        foreach ($this->refreshTokenRepository->findAll() as $refreshToken) {
+            if (!$refreshToken->getValidUntil()) {
+                continue;
+            }
+            if ($refreshToken->getValidUntil() < $now) {
+                $this->entityManager->remove($refreshToken);
             }
         }
         $this->entityManager->flush();

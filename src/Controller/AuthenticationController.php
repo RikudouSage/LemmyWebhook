@@ -11,6 +11,7 @@ use App\Repository\RefreshTokenRepository;
 use App\Repository\UserRepository;
 use App\Service\AuthenticationManager;
 use App\Service\RawWebhookParser;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -107,7 +108,7 @@ final class AuthenticationController extends AbstractController
         $refreshToken = $refreshTokenRepository->findOneBy([
             'token' => $request->refreshToken,
         ]);
-        if ($refreshToken === null) {
+        if ($refreshToken === null || ($refreshToken->getValidUntil() && $refreshToken->getValidUntil() < new DateTimeImmutable())) {
             return new JsonResponse([
                 'error' => 'Invalid token',
             ], Response::HTTP_BAD_REQUEST);

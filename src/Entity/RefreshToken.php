@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\RefreshTokenRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: RefreshTokenRepository::class)]
@@ -20,6 +21,9 @@ class RefreshToken
     #[ORM\ManyToOne(inversedBy: 'refreshTokens')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?DateTimeImmutable $validUntil = null;
 
     public function getId(): ?int
     {
@@ -53,5 +57,17 @@ class RefreshToken
     public function __toString(): string
     {
         return (string) $this->token;
+    }
+
+    public function getValidUntil(): ?DateTimeImmutable
+    {
+        return $this->validUntil;
+    }
+
+    public function setValidUntil(?DateTimeImmutable $validUntil): static
+    {
+        $this->validUntil = $validUntil;
+
+        return $this;
     }
 }

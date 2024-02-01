@@ -31,10 +31,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?string $password = null;
 
+    #[ApiProperty]
     #[ORM\Column]
     private bool $enabled = false;
 
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Webhook::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Webhook::class, cascade: ['persist', 'remove'])]
     #[ApiProperty(relation: true)]
     private Collection $webhooks;
 
