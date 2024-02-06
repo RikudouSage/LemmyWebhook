@@ -69,6 +69,7 @@ The table is quite simple and consists of these fields:
   - `person`
   - `registration_application`
   - `private_message_report`
+  - `local_user`
 - `operation` (optional) - the kind of operation this webhook is interested in, can be `INSERT`, `UPDATE`, `DELETE` (taken from the [DatabaseOperation](src/Enum/DatabaseOperation.php) enum)
 - `headers` (optional) - a JSON object with keys as header names and values as header values
 - `enhanced_filter` (optional) - an expression that must evaluate to true if this webhook is to run, more on expressions below
@@ -125,6 +126,7 @@ based on what you're being notified about. Here's a list of all `table` values c
 - `person` - [PersonData](src/Dto/RawData/PersonData.php)
 - `registration_application` - [RegistrationApplicationData](src/Dto/RawData/RegistrationApplicationData.php)
 - `private_message_report` - [PrivateMessageReportData](src/Dto/RawData/PrivateMessageReportData.php)
+- `local_user` - [LocalUserData](src/Dto/RawData/LocalUserData.php)
 
 ### Basic vs enhanced expressions
 
@@ -146,6 +148,7 @@ Enhanced expressions, in addition to the above, have access to these functions:
 - `community(communityId)` - returns the [CommunityData](src/Dto/RawData/CommunityData.php) DTO for community with given ID (or null if no such community exists)
 - `instance(instanceId)` - returns the [InstanceData](src/Dto/RawData/InstanceData.php) DTO for instance with given ID (or null if no such instance exists)
 - `post(postId)` - returns the [PostData](src/Dto/RawData/PostData.php) DTO for post with given ID (or null if no such post exists)
+- `person(personId)` - returns the [PersonData](src/Dto/RawData/PersonData.php) DTO for a person with given ID (or null if no such person exists)
 
 Simple expressions can be used everywhere, but enhanced expressions cannot be used in the `filter_expression` field.
 That's because `filter_expression` runs synchronously on the main thread and could potentially block further processing if it took too long.

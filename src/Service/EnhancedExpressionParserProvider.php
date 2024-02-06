@@ -4,8 +4,10 @@ namespace App\Service;
 
 use App\Dto\RawData\CommunityData;
 use App\Dto\RawData\InstanceData;
+use App\Dto\RawData\PersonData;
 use App\Dto\RawData\PostData;
 use App\SqlObject\Instance\InstanceCreatedTrigger;
+use App\SqlObject\Person\PersonCreatedTrigger;
 use App\SqlObject\Post\PostCreatedTrigger;
 use Doctrine\DBAL\Connection;
 use LogicException;
@@ -19,6 +21,7 @@ final readonly class EnhancedExpressionParserProvider implements ExpressionFunct
         private RawWebhookParser $webhookParser,
         private PostCreatedTrigger $postTrigger,
         private InstanceCreatedTrigger $instanceCreatedTrigger,
+        private PersonCreatedTrigger $personTrigger,
     ) {
     }
 
@@ -62,7 +65,20 @@ final readonly class EnhancedExpressionParserProvider implements ExpressionFunct
 
                     return $this->webhookParser->deserialize($data, PostData::class);
                 }
-            )
+            ),
+            new ExpressionFunction(
+                'person',
+                fn () => throw new LogicException('This function cannot be compiled.'),
+                function (array $context, int $personId): ?PersonData {
+                    $fields = implode(',', $this->personTrigger->getFields());
+                    $data = $this->connection->executeQuery("select {$fields} from person where id = :id", ['id' => $personId])->fetchAssociative();
+                    if ($data === false) {
+                        return null;
+                    }
+
+                    return $this->webhookParser->deserialize($data, PersonData::class);
+                },
+            ),
         ];
     }
 }
