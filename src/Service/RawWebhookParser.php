@@ -56,7 +56,7 @@ final readonly class RawWebhookParser
         $object = $reflection->newInstance();
 
         foreach ($raw as $key => $value) {
-            $propertyName = preg_replace_callback('@_([a-z])@', function (array $matches) {
+            $propertyName = preg_replace_callback('@_([a-z0-9])@', function (array $matches) {
                 return strtoupper($matches[1]);
             }, $key);
             $propertyReflection = $reflection->getProperty($propertyName);
