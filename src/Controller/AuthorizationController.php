@@ -28,7 +28,7 @@ final class AuthorizationController extends AbstractController
         iterable $types,
         AuthorizationCheckerInterface $authorizationChecker,
     ): JsonResponse {
-        $user = $this->getUser();
+        $user = $this->getUser() ?? new User();
         assert($user instanceof User);
 
         return new JsonResponse(array_map(function (object $type) use ($user, $authorizationChecker) {
