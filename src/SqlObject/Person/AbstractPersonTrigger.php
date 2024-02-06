@@ -11,7 +11,7 @@ abstract readonly class AbstractPersonTrigger extends AbstractTableTrigger
         return 'person';
     }
 
-    protected function getFields(): array
+    public function getFields(): array
     {
         return [
             'id',
