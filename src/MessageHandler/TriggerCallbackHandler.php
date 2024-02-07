@@ -2,9 +2,12 @@
 
 namespace App\MessageHandler;
 
-use App\Message\CleanupExpiredTokensMessage;
+use App\Entity\WebhookResponse;
+use App\Message\CleanupExpiredRowsMessage;
 use App\Message\TriggerCallbackMessage;
 use App\Service\ExpressionParser;
+use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
@@ -17,13 +20,14 @@ final readonly class TriggerCallbackHandler
         private HttpClientInterface $httpClient,
         private ExpressionParser $expressionParser,
         private MessageBusInterface $messageBus,
+        private EntityManagerInterface $entityManager,
     ) {
     }
 
     public function __invoke(TriggerCallbackMessage $message): void
     {
         if (random_int(0, 100) === 50) {
-            $this->messageBus->dispatch(new CleanupExpiredTokensMessage(), [
+            $this->messageBus->dispatch(new CleanupExpiredRowsMessage(), [
                 new DispatchAfterCurrentBusStamp(),
             ]);
         }
@@ -50,11 +54,24 @@ final readonly class TriggerCallbackHandler
             $requestOptions['json'] = $this->expressionParser->evaluate($bodyExpression, ['data' => $data]);
         }
 
-        $this->httpClient->request(
+        $response = $this->httpClient->request(
             $webhook->getMethod()->value,
             $webhook->getUrl(),
             $requestOptions,
         );
-        error_log('Webhook has been sent');
+
+        $responseLog = (new WebhookResponse())
+            ->setBody($response->getContent(false))
+            ->setStatusCode($response->getStatusCode())
+            ->setWebhook($webhook)
+            ->setValidUntil(new DateTimeImmutable('+3 days'))
+            ->setHeaders($response->getHeaders())
+        ;
+        if ($webhook->shouldLogResponses()) {
+            $this->entityManager->persist($responseLog);
+            $this->entityManager->flush();
+        }
+
+        error_log("Webhook has been sent, status code: {$responseLog->getStatusCode()}");
     }
 }
