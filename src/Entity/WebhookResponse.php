@@ -6,8 +6,13 @@ use App\Repository\WebhookResponseRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Rikudou\JsonApiBundle\Attribute\ApiProperty;
+use Rikudou\JsonApiBundle\Attribute\ApiResource;
 
+#[ApiResource]
 #[ORM\Entity(repositoryClass: WebhookResponseRepository::class)]
+#[ORM\Table(name: 'webhook_responses')]
+#[ORM\HasLifecycleCallbacks]
 class WebhookResponse
 {
     #[ORM\Id]
@@ -15,21 +20,30 @@ class WebhookResponse
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ApiProperty(relation: true)]
     #[ORM\ManyToOne(inversedBy: 'webhookResponses')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Webhook $webhook = null;
 
+    #[ApiProperty]
     #[ORM\Column]
     private ?int $statusCode = null;
 
+    #[ApiProperty]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $body = null;
 
+    #[ApiProperty]
     #[ORM\Column(type: Types::JSON)]
     private array $headers = [];
 
+    #[ApiProperty]
     #[ORM\Column]
     private ?DateTimeImmutable $validUntil = null;
+
+    #[ApiProperty]
+    #[ORM\Column]
+    private ?DateTimeImmutable $created = null;
 
     public function getId(): ?int
     {
@@ -94,5 +108,25 @@ class WebhookResponse
         $this->validUntil = $validUntil;
 
         return $this;
+    }
+
+    public function getCreated(): ?DateTimeImmutable
+    {
+        return $this->created;
+    }
+
+    public function setCreated(DateTimeImmutable $created): static
+    {
+        $this->created = $created;
+
+        return $this;
+    }
+
+    #[ORM\PrePersist]
+    public function setCreatedDateOnPersist(): void
+    {
+        if ($this->getCreated() === null) {
+            $this->setCreated(new DateTimeImmutable());
+        }
     }
 }
