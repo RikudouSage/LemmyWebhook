@@ -5,6 +5,8 @@ namespace App\Entity;
 use App\Enum\DatabaseOperation;
 use App\Enum\RequestMethod;
 use App\Repository\WebhookRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use JetBrains\PhpStorm\ExpectedValues;
@@ -64,6 +66,18 @@ class Webhook
     #[ApiProperty(relation: true)]
     #[ORM\ManyToOne(inversedBy: 'webhooks')]
     private ?User $user = null;
+
+    #[ORM\OneToMany(mappedBy: 'webhook', targetEntity: WebhookResponse::class, orphanRemoval: true)]
+    private Collection $webhookResponses;
+
+    #[ApiProperty(getter: 'shouldLogResponses')]
+    #[ORM\Column]
+    private bool $logResponses = false;
+
+    public function __construct()
+    {
+        $this->webhookResponses = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -200,6 +214,48 @@ class Webhook
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, WebhookResponse>
+     */
+    public function getWebhookResponses(): Collection
+    {
+        return $this->webhookResponses;
+    }
+
+    public function addWebhookResponse(WebhookResponse $webhookResponse): static
+    {
+        if (!$this->webhookResponses->contains($webhookResponse)) {
+            $this->webhookResponses->add($webhookResponse);
+            $webhookResponse->setWebhook($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWebhookResponse(WebhookResponse $webhookResponse): static
+    {
+        if ($this->webhookResponses->removeElement($webhookResponse)) {
+            // set the owning side to null (unless already changed)
+            if ($webhookResponse->getWebhook() === $this) {
+                $webhookResponse->setWebhook(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function shouldLogResponses(): bool
+    {
+        return $this->logResponses;
+    }
+
+    public function setLogResponses(bool $logResponses): static
+    {
+        $this->logResponses = $logResponses;
 
         return $this;
     }
