@@ -68,7 +68,7 @@ final readonly class TriggerCallbackHandler
             ->setBody($response->getContent(false))
             ->setStatusCode($response->getStatusCode())
             ->setWebhook($webhook)
-            ->setValidUntil(new DateTimeImmutable('+1 day'))
+            ->setValidUntil(new DateTimeImmutable('+6 hours'))
             ->setHeaders($response->getHeaders())
         ;
         if ($webhook->shouldLogResponses()) {
