@@ -5,9 +5,11 @@ namespace App\MessageHandler;
 use App\Entity\WebhookResponse;
 use App\Message\CleanupExpiredRowsMessage;
 use App\Message\TriggerCallbackMessage;
+use App\Repository\WebhookRepository;
 use App\Service\ExpressionParser;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use LogicException;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
@@ -21,6 +23,7 @@ final readonly class TriggerCallbackHandler
         private ExpressionParser $expressionParser,
         private MessageBusInterface $messageBus,
         private EntityManagerInterface $entityManager,
+        private WebhookRepository $webhookRepository,
     ) {
     }
 
@@ -32,7 +35,8 @@ final readonly class TriggerCallbackHandler
             ]);
         }
 
-        $webhook = $message->webhook;
+        $webhook = $this->webhookRepository->find($message->webhook->getId())
+            ?? throw new LogicException("Could not find the webhook with ID {$message->webhook->getId()}");
         $data = $message->data;
 
         if (($enhancedFilter = $webhook->getEnhancedFilter()) && !$this->expressionParser->evaluate($enhancedFilter, ['data' => $data])) {
