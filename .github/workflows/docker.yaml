@@ -34,13 +34,12 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/rikudousage/lemmy-webhook-manager
+          images: ghcr.io/rikudousage/lemmy-webhook
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=raw,value=dev
-            - name: Build and push Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
