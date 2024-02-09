@@ -74,6 +74,9 @@ class Webhook
     #[ORM\Column]
     private bool $logResponses = false;
 
+    #[ORM\Column(length: 180, unique: true, nullable: true)]
+    private ?string $uniqueMachineName = null;
+
     public function __construct()
     {
         $this->webhookResponses = new ArrayCollection();
@@ -256,6 +259,18 @@ class Webhook
     public function setLogResponses(bool $logResponses): static
     {
         $this->logResponses = $logResponses;
+
+        return $this;
+    }
+
+    public function getUniqueMachineName(): ?string
+    {
+        return $this->uniqueMachineName;
+    }
+
+    public function setUniqueMachineName(?string $uniqueMachineName): static
+    {
+        $this->uniqueMachineName = $uniqueMachineName;
 
         return $this;
     }
