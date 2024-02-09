@@ -9,6 +9,7 @@ use App\Enum\RequestMethod;
 use App\Exception\InvalidImportException;
 use App\Repository\WebhookRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Yaml\Yaml;
 
 final readonly class WebhookImporter
@@ -17,6 +18,7 @@ final readonly class WebhookImporter
         private RawWebhookParser $webhookParser,
         private WebhookRepository $webhookRepository,
         private EntityManagerInterface $entityManager,
+        private Security $security,
     ) {
     }
 
@@ -80,6 +82,7 @@ final readonly class WebhookImporter
                 ->setEnhancedFilter($webhookDto->enhancedFilterExpression)
                 ->setHeaders($webhookDto->headers)
                 ->setEnabled($webhookDto->enabled)
+                ->setUser($this->security->getUser())
             ;
             $this->entityManager->persist($webhookEntity);
         }
