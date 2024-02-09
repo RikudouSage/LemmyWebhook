@@ -74,6 +74,7 @@ class Webhook
     #[ORM\Column]
     private bool $logResponses = false;
 
+    #[ApiProperty]
     #[ORM\Column(length: 180, unique: true, nullable: true)]
     private ?string $uniqueMachineName = null;
 
