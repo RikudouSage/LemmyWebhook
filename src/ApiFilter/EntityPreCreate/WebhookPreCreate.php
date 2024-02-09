@@ -5,6 +5,10 @@ namespace App\ApiFilter\EntityPreCreate;
 use App\Entity\Scope;
 use App\Entity\User;
 use App\Entity\Webhook;
+use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
+use Doctrine\ORM\Event\PrePersistEventArgs;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
+use Doctrine\ORM\Events;
 use Rikudou\JsonApiBundle\ApiEntityEvents;
 use Rikudou\JsonApiBundle\Events\EntityPreCreateEvent;
 use Rikudou\JsonApiBundle\Events\EntityPreUpdateEvent;
@@ -14,8 +18,10 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
-#[AsEventListener(event: ApiEntityEvents::PRE_CREATE, method: 'preCreate')]
-#[AsEventListener(event: ApiEntityEvents::PRE_UPDATE, method: 'preUpdate')]
+#[AsEventListener(event: ApiEntityEvents::PRE_CREATE, method: 'preCreateApi')]
+#[AsEventListener(event: ApiEntityEvents::PRE_UPDATE, method: 'preUpdateApi')]
+#[AsDoctrineListener(event: Events::prePersist)]
+#[AsDoctrineListener(event: Events::preUpdate)]
 final readonly class WebhookPreCreate
 {
     public function __construct(
@@ -24,7 +30,25 @@ final readonly class WebhookPreCreate
     ) {
     }
 
-    public function preCreate(EntityPreCreateEvent $event): void
+    public function prePersist(PrePersistEventArgs $event): void
+    {
+        $entity = $event->getObject();
+        if (!$entity instanceof Webhook) {
+            return;
+        }
+        $this->handle($entity);
+    }
+
+    public function preUpdate(PreUpdateEventArgs $event): void
+    {
+        $entity = $event->getObject();
+        if (!$entity instanceof Webhook) {
+            return;
+        }
+        $this->handle($entity);
+    }
+
+    public function preCreateApi(EntityPreCreateEvent $event): void
     {
         $entity = $event->getEntity();
         if (!$entity instanceof Webhook) {
@@ -33,7 +57,7 @@ final readonly class WebhookPreCreate
         $this->handle($entity);
     }
 
-    public function preUpdate(EntityPreUpdateEvent $event): void
+    public function preUpdateApi(EntityPreUpdateEvent $event): void
     {
         $entity = $event->getEntity();
         if (!$entity instanceof Webhook) {
