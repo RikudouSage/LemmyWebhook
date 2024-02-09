@@ -20,6 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 #[ORM\Index(fields: ['objectType'])]
 #[ORM\Index(fields: ['operation'])]
 #[ORM\Index(fields: ['enabled'])]
+#[ORM\UniqueConstraint(fields: ['user', 'uniqueMachineName'])]
 class Webhook
 {
     #[ORM\Id]
@@ -75,7 +76,7 @@ class Webhook
     private bool $logResponses = false;
 
     #[ApiProperty]
-    #[ORM\Column(length: 180, unique: true, nullable: true)]
+    #[ORM\Column(length: 180, nullable: true)]
     private ?string $uniqueMachineName = null;
 
     public function __construct()
