@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Dto\Model\WebhookImportData;
+use App\Entity\User;
 use App\Entity\Webhook;
 use App\Enum\DatabaseOperation;
 use App\Enum\RequestMethod;
@@ -28,6 +29,9 @@ final readonly class WebhookImporter
         if (!isset($parsed['webhooks'])) {
             throw new InvalidImportException("The 'webhooks' root property is missing.");
         }
+
+        $currentUser = $this->security->getUser();
+        assert($currentUser instanceof User);
 
         foreach ($parsed['webhooks'] as $webhook) {
             if (!isset($webhook['uniqueMachineName'])) {
@@ -69,10 +73,11 @@ final readonly class WebhookImporter
 
             $webhookEntity = $this->webhookRepository->findOneBy([
                 'uniqueMachineName' => $webhookDto->uniqueMachineName,
+                'user' => $currentUser,
             ]);
             $webhookEntity ??= (new Webhook())
                 ->setUniqueMachineName($webhookDto->uniqueMachineName)
-                ->setUser($this->security->getUser())
+                ->setUser($currentUser)
                 ->setEnabled($webhookDto->enabled)
             ;
 
