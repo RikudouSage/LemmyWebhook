@@ -73,6 +73,7 @@ final readonly class WebhookImporter
             $webhookEntity ??= (new Webhook())
                 ->setUniqueMachineName($webhookDto->uniqueMachineName)
                 ->setUser($this->security->getUser())
+                ->setEnabled($webhookDto->enabled)
             ;
 
             $webhookEntity
@@ -84,7 +85,6 @@ final readonly class WebhookImporter
                 ->setFilterExpression($webhookDto->filterExpression)
                 ->setEnhancedFilter($webhookDto->enhancedFilterExpression)
                 ->setHeaders($webhookDto->headers)
-                ->setEnabled($webhookDto->enabled)
             ;
             $this->entityManager->persist($webhookEntity);
         }
