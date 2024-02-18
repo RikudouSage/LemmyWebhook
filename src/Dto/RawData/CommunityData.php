@@ -10,7 +10,7 @@ final readonly class CommunityData
     public int $id;
     public string $name;
     public string $title;
-    public string $description;
+    public ?string $description;
     public bool $removed;
     public bool $deleted;
     public bool $nsfw;

@@ -11,7 +11,7 @@ abstract readonly class AbstractPrivateMessageTrigger extends AbstractTableTrigg
         return 'private_message';
     }
 
-    protected function getFields(): array
+    public function getFields(): array
     {
         return [
             'id',

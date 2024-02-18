@@ -11,7 +11,7 @@ abstract readonly class AbstractLocalUserTrigger extends AbstractTableTrigger
         return 'local_user';
     }
 
-    protected function getFields(): array
+    public function getFields(): array
     {
         return [
             'id',

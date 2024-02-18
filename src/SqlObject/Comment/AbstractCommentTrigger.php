@@ -11,7 +11,7 @@ abstract readonly class AbstractCommentTrigger extends AbstractTableTrigger
         return 'comment';
     }
 
-    protected function getFields(): array
+    public function getFields(): array
     {
         return [
             'id',

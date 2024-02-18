@@ -142,6 +142,7 @@ Simple expressions have access to these functions:
 - `transliterate(text)` - returns the string transliterated to standard latin characters:
   - example: `transliterate("Hélľö, hów ärě ýöů?")` -> `Hello, how are you?`
   - example: `transliterate("𝐻𝐞𝒍𝓁𝓸 𝔱𝕙𝖊𝗋𝚎!")` -> `Hello there!`
+- `merge(arrayOrDictionary1, arrayOrDictionary2, ..., arrayOrDictionaryN)` - recursively merges an arbitrary number of arrays or dictionaries
 
 Enhanced expressions, in addition to the above, have access to these functions:
 
@@ -149,6 +150,11 @@ Enhanced expressions, in addition to the above, have access to these functions:
 - `instance(instanceId)` - returns the [InstanceData](src/Dto/RawData/InstanceData.php) DTO for instance with given ID (or null if no such instance exists)
 - `post(postId)` - returns the [PostData](src/Dto/RawData/PostData.php) DTO for post with given ID (or null if no such post exists)
 - `person(personId)` - returns the [PersonData](src/Dto/RawData/PersonData.php) DTO for a person with given ID (or null if no such person exists)
+- `comment(commentId)` - returns the [CommentData](src/Dto/RawData/CommentData.php) DTO for a comment with given ID (or null if no such comment exists)
+- `local_user(userId)` - returns the [LocalUserData](src/Dto/RawData/LocalUserData.php) DTO for a local user with given ID (or null if no such user exists)
+- `private_message(privateMessageId)` - returns the [PrivateMessageData](src/Dto/RawData/PrivateMessageData.php) DTO for a private message with given ID (or null if no such private message exists)
+
+> note that in all the cases above, null will also be returned if you don't have permission to access any of the given object types
 
 Simple expressions can be used everywhere, but enhanced expressions cannot be used in the `filter_expression` field.
 That's because `filter_expression` runs synchronously on the main thread and could potentially block further processing if it took too long.
