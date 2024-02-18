@@ -20,7 +20,7 @@ abstract readonly class AbstractPrivateMessageReportTrigger extends AbstractTabl
             'original_pm_text',
             'reason',
             'resolved',
-            'resolved_id',
+            'resolver_id',
         ];
     }
 }
