@@ -39,7 +39,7 @@ final readonly class TriggerCallbackHandler
             ?? throw new LogicException("Could not find the webhook with ID {$message->webhook->getId()}");
         $data = $message->data;
 
-        if (($enhancedFilter = $webhook->getEnhancedFilter()) && !$this->expressionParser->evaluate($enhancedFilter, ['data' => $data])) {
+        if (($enhancedFilter = $webhook->getEnhancedFilter()) && !$this->expressionParser->evaluate($enhancedFilter, ['data' => $data, 'triggering_user' => $webhook->getUser()?->getId()])) {
             error_log('Data did not pass enhanced filter');
             return;
         }
@@ -55,7 +55,7 @@ final readonly class TriggerCallbackHandler
 
         $bodyExpression = $webhook->getBodyExpression();
         if ($bodyExpression !== null) {
-            $requestOptions['json'] = $this->expressionParser->evaluate($bodyExpression, ['data' => $data]);
+            $requestOptions['json'] = $this->expressionParser->evaluate($bodyExpression, ['data' => $data, 'triggering_user' => $webhook->getUser()?->getId()]);
         }
 
         $response = $this->httpClient->request(

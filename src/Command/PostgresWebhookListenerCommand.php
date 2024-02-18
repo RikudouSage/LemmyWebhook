@@ -91,7 +91,7 @@ final class PostgresWebhookListenerCommand extends Command
 
                 $filterExpression = $webhook->getFilterExpression();
                 try {
-                    if ($filterExpression !== null && !$this->expressionParser->evaluate($filterExpression, ['data' => $data])) {
+                    if ($filterExpression !== null && !$this->expressionParser->evaluate($filterExpression, ['data' => $data, 'triggering_user' => $webhook->getUser()?->getId()])) {
                         if ($output->isVeryVerbose()) {
                             $io->comment("The filter expression did not evaluate to true, skipping webhook {$i}");
                         }

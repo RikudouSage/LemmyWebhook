@@ -6,6 +6,7 @@ use LogicException;
 use Override;
 use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
+use function Rikudou\ArrayMergeRecursive\array_merge_recursive;
 
 final readonly class StandardExpressionParserProvider implements ExpressionFunctionProviderInterface
 {
@@ -32,6 +33,13 @@ final readonly class StandardExpressionParserProvider implements ExpressionFunct
                 fn () => throw new LogicException('This function cannot be compiled.'),
                 function (array $context, string $text): string {
                     return transliterator_transliterate('NFKC; Any-Latin; Latin-ASCII;', $text);
+                },
+            ),
+            new ExpressionFunction(
+                'merge',
+                fn () => throw new LogicException('This function cannot be compiled.'),
+                function (array $context, array ...$arrays): array {
+                    return array_merge_recursive(...$arrays);
                 },
             ),
         ];
