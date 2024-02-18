@@ -140,12 +140,12 @@ final readonly class EnhancedExpressionParserProvider implements ExpressionFunct
             new ExpressionFunction(
                 'private_message',
                 fn () => throw new LogicException('This function cannot be compiled.'),
-                function (array $context, int $userId): ?PrivateMessageData {
+                function (array $context, int $privateMessageId): ?PrivateMessageData {
                     if (!$this->doesHaveAccess($this->privateMessageTrigger->getTable(), $context['triggering_user'])) {
                         return null;
                     }
                     $fields = implode(',', $this->privateMessageTrigger->getFields());
-                    $data = $this->connection->executeQuery("select {$fields} from private_message where id = :id", ['id' => $userId])->fetchAssociative();
+                    $data = $this->connection->executeQuery("select {$fields} from private_message where id = :id", ['id' => $privateMessageId])->fetchAssociative();
                     if ($data === false) {
                         return null;
                     }
