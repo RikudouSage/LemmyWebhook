@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "54e75f4ea70b794251d92d898b979bdd",
+    "content-hash": "d82974f9fc51e60a1acb321cd49519b7",
     "packages": [
         {
             "name": "doctrine/cache",
@@ -2320,6 +2320,62 @@
                 "source": "https://github.com/RikudouSage/LemmyApi/tree/v0.4.0"
             },
             "time": "2023-12-19T20:04:20+00:00"
+        },
+        {
+            "name": "rikudou/memoize-bundle",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/RikudouSage/SymfonyMemoizeBundle.git",
+                "reference": "da1646aca19e60b8c180212b5aecd7336ba04a02"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/RikudouSage/SymfonyMemoizeBundle/zipball/da1646aca19e60b8c180212b5aecd7336ba04a02",
+                "reference": "da1646aca19e60b8c180212b5aecd7336ba04a02",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "symfony/framework-bundle": "^5.4|^6.0|^7.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.5",
+                "jetbrains/phpstorm-attributes": "^1.0",
+                "phpstan/phpstan": "^1.4"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Rikudou\\MemoizeBundle\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Dominik Chrastecky",
+                    "email": "dominik@chrastecky.cz"
+                }
+            ],
+            "description": "Automatic memoization for your Symfony services",
+            "support": {
+                "issues": "https://github.com/RikudouSage/SymfonyMemoizeBundle/issues",
+                "source": "https://github.com/RikudouSage/SymfonyMemoizeBundle/tree/v1.1.0"
+            },
+            "funding": [
+                {
+                    "url": "https://ko-fi.com/dominik_ch",
+                    "type": "ko_fi"
+                },
+                {
+                    "url": "https://liberapay.com/dominik_ch",
+                    "type": "liberapay"
+                }
+            ],
+            "time": "2024-02-07T10:41:01+00:00"
         },
         {
             "name": "rikudou/reflection-file",
