@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use DateTimeInterface;
 use LogicException;
 use Override;
 use Symfony\Component\ExpressionLanguage\ExpressionFunction;
@@ -38,10 +39,29 @@ final readonly class StandardExpressionParserProvider implements ExpressionFunct
             new ExpressionFunction(
                 'merge',
                 fn () => throw new LogicException('This function cannot be compiled.'),
-                function (array $context, array ...$arrays): array {
+                function (array $context, array|object ...$arrays): array {
+                    $arrays = array_map(fn (array|object $item) => $this->toArray($item), $arrays);
                     return array_merge_recursive(...$arrays);
                 },
             ),
         ];
+    }
+
+    private function toArray(array|object $array): array
+    {
+        if (is_object($array)) {
+            $array = (array) $array;
+        }
+        foreach ($array as $key => $value) {
+            if ($value instanceof DateTimeInterface) {
+                $array[$key] = $value->format('c');
+            } elseif (is_object($value)) {
+                $array[$key] = $this->toArray($value);
+            } else {
+                $array[$key] = $value;
+            }
+        }
+
+        return $array;
     }
 }
