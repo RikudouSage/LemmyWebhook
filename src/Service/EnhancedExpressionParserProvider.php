@@ -18,6 +18,7 @@ use App\SqlObject\Post\PostCreatedTrigger;
 use App\SqlObject\PrivateMessage\PrivateMessageCreatedTrigger;
 use Doctrine\DBAL\Connection;
 use LogicException;
+use Rikudou\MemoizeBundle\Cache\InMemoryCachePool;
 use Symfony\Component\ExpressionLanguage\ExpressionFunction;
 use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -36,6 +37,7 @@ final readonly class EnhancedExpressionParserProvider implements ExpressionFunct
         private CommentCreatedTrigger $commentTrigger,
         private LocalUserCreatedTrigger $localUserTrigger,
         private PrivateMessageCreatedTrigger $privateMessageTrigger,
+        private InMemoryCachePool $inMemoryCache,
     ) {
     }
 
@@ -45,115 +47,109 @@ final readonly class EnhancedExpressionParserProvider implements ExpressionFunct
             new ExpressionFunction(
                 'community',
                 fn () => throw new LogicException('This function cannot be compiled.'),
-                function (array $context, int $communityId): ?CommunityData {
-                    if (!$this->doesHaveAccess('community', $context['triggering_user'])) {
-                        return null;
-                    }
-                    $data = $this->connection->executeQuery('select id, name, title, description, removed, deleted, nsfw, actor_id, local, hidden, instance_id from community where id = :id', ['id' => $communityId])->fetchAssociative();
-                    if ($data === false) {
-                        return null;
-                    }
-
-                    return $this->webhookParser->deserialize($data, CommunityData::class);
-                }
+                fn (array $context, int $communityId): ?CommunityData => $this->getDto(
+                    table: 'community',
+                    triggeringUser: $context['triggering_user'],
+                    id: $communityId,
+                    fields: ['id', 'name', 'title', 'description', 'removed', 'deleted', 'nsfw', 'actor_id', 'local', 'hidden', 'instance_id'],
+                    class: CommunityData::class,
+                ),
             ),
             new ExpressionFunction(
                 'instance',
                 fn () => throw new LogicException('This function cannot be compiled.'),
-                function (array $context, int $instanceId): ?InstanceData {
-                    if (!$this->doesHaveAccess($this->instanceCreatedTrigger->getTable(), $context['triggering_user'])) {
-                        return null;
-                    }
-                    $fields = implode(',', $this->instanceCreatedTrigger->getFields());
-                    $data = $this->connection->executeQuery("select {$fields} from instance where id = :id", ['id' => $instanceId])->fetchAssociative();
-                    if ($data === false) {
-                        return null;
-                    }
-
-                    return $this->webhookParser->deserialize($data, InstanceData::class);
-                }
+                fn (array $context, int $instanceId): ?InstanceData => $this->getDto(
+                    table: $this->instanceCreatedTrigger->getTable(),
+                    triggeringUser: $context['triggering_user'],
+                    id: $instanceId,
+                    fields: $this->instanceCreatedTrigger->getFields(),
+                    class: InstanceData::class,
+                ),
             ),
             new ExpressionFunction(
                 'post',
                 fn () => throw new LogicException('This function cannot be compiled.'),
-                function (array $context, int $postId): ?PostData {
-                    if (!$this->doesHaveAccess($this->postTrigger->getTable(), $context['triggering_user'])) {
-                        return null;
-                    }
-                    $fields = implode(',', $this->postTrigger->getFields());
-                    $data = $this->connection->executeQuery("select {$fields} from post where id = :id", ['id' => $postId])->fetchAssociative();
-                    if ($data === false) {
-                        return null;
-                    }
-
-                    return $this->webhookParser->deserialize($data, PostData::class);
-                }
+                fn (array $context, int $postId): ?PostData => $this->getDto(
+                    table: $this->postTrigger->getTable(),
+                    triggeringUser: $context['triggering_user'],
+                    id: $postId,
+                    fields: $this->postTrigger->getFields(),
+                    class: PostData::class,
+                ),
             ),
             new ExpressionFunction(
                 'person',
                 fn () => throw new LogicException('This function cannot be compiled.'),
-                function (array $context, int $personId): ?PersonData {
-                    if (!$this->doesHaveAccess($this->personTrigger->getTable(), $context['triggering_user'])) {
-                        return null;
-                    }
-                    $fields = implode(',', $this->personTrigger->getFields());
-                    $data = $this->connection->executeQuery("select {$fields} from person where id = :id", ['id' => $personId])->fetchAssociative();
-                    if ($data === false) {
-                        return null;
-                    }
-
-                    return $this->webhookParser->deserialize($data, PersonData::class);
-                },
+                fn (array $context, int $personId): ?PersonData => $this->getDto(
+                    table: $this->personTrigger->getTable(),
+                    triggeringUser: $context['triggering_user'],
+                    id: $personId,
+                    fields: $this->personTrigger->getFields(),
+                    class: PersonData::class,
+                ),
             ),
             new ExpressionFunction(
                 'comment',
                 fn () => throw new LogicException('This function cannot be compiled.'),
-                function (array $context, int $commentId): ?CommentData {
-                    if (!$this->doesHaveAccess($this->commentTrigger->getTable(), $context['triggering_user'])) {
-                        return null;
-                    }
-                    $fields = implode(',', $this->commentTrigger->getFields());
-                    $data = $this->connection->executeQuery("select {$fields} from comment where id = :id", ['id' => $commentId])->fetchAssociative();
-                    if ($data === false) {
-                        return null;
-                    }
-
-                    return $this->webhookParser->deserialize($data, CommentData::class);
-                },
+                fn (array $context, int $commentId): ?CommentData => $this->getDto(
+                    table: $this->commentTrigger->getTable(),
+                    triggeringUser: $context['triggering_user'],
+                    id: $commentId,
+                    fields: $this->commentTrigger->getFields(),
+                    class: CommentData::class,
+                ),
             ),
             new ExpressionFunction(
                 'local_user',
                 fn () => throw new LogicException('This function cannot be compiled.'),
-                function (array $context, int $userId): ?LocalUserData {
-                    if (!$this->doesHaveAccess($this->localUserTrigger->getTable(), $context['triggering_user'])) {
-                        return null;
-                    }
-                    $fields = implode(',', $this->localUserTrigger->getFields());
-                    $data = $this->connection->executeQuery("select {$fields} from local_user where id = :id", ['id' => $userId])->fetchAssociative();
-                    if ($data === false) {
-                        return null;
-                    }
-
-                    return $this->webhookParser->deserialize($data, LocalUserData::class);
-                },
+                fn (array $context, int $userId): ?LocalUserData => $this->getDto(
+                    table: $this->localUserTrigger->getTable(),
+                    triggeringUser: $context['triggering_user'],
+                    id: $userId,
+                    fields: $this->localUserTrigger->getFields(),
+                    class: LocalUserData::class,
+                ),
             ),
             new ExpressionFunction(
                 'private_message',
                 fn () => throw new LogicException('This function cannot be compiled.'),
-                function (array $context, int $privateMessageId): ?PrivateMessageData {
-                    if (!$this->doesHaveAccess($this->privateMessageTrigger->getTable(), $context['triggering_user'])) {
-                        return null;
-                    }
-                    $fields = implode(',', $this->privateMessageTrigger->getFields());
-                    $data = $this->connection->executeQuery("select {$fields} from private_message where id = :id", ['id' => $privateMessageId])->fetchAssociative();
-                    if ($data === false) {
-                        return null;
-                    }
-
-                    return $this->webhookParser->deserialize($data, PrivateMessageData::class);
-                },
+                fn (array $context, int $privateMessageId): ?PrivateMessageData => $this->getDto(
+                    table: $this->privateMessageTrigger->getTable(),
+                    triggeringUser: $context['triggering_user'],
+                    id: $privateMessageId,
+                    fields: $this->privateMessageTrigger->getFields(),
+                    class: PrivateMessageData::class,
+                ),
             )
         ];
+    }
+
+    /**
+     * @template TDto of object
+     * @param array<string> $fields
+     * @param class-string<TDto> $class
+     * @return TDto|null
+     */
+    private function getDto(string $table, ?int $triggeringUser, int $id, array $fields, string $class): ?object
+    {
+        $fields = implode(',', $fields);
+        $cacheItem = $this->inMemoryCache->getItem("dto.{$table}.{$triggeringUser}.{$id}.{$fields}.{$class}");
+        if ($cacheItem->isHit()) {
+            return $cacheItem->get();
+        }
+
+        if (!$this->doesHaveAccess($table, $triggeringUser)) {
+            return null;
+        }
+        $data = $this->connection->executeQuery("select {$fields} from {$table} where id = :id", ['id' => $id])->fetchAssociative();
+        if ($data === false) {
+            return null;
+        }
+
+        $cacheItem->set($this->webhookParser->deserialize($data, $class));
+        $this->inMemoryCache->save($cacheItem);
+
+        return $cacheItem->get();
     }
 
     private function doesHaveAccess(string $table, ?int $userId): bool
