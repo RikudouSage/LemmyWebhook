@@ -10,6 +10,7 @@ use App\Service\ExpressionParser;
 use App\Service\RawWebhookParser;
 use Doctrine\ORM\EntityManagerInterface;
 use PDO;
+use PDOException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,7 +39,9 @@ final class PostgresWebhookListenerCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $this->pdo->exec('delete from rikudou_webhooks_large_payloads');
+        try {
+            $this->pdo->exec('delete from rikudou_webhooks_large_payloads');
+        } catch (PDOException) {}
         $this->pdo->exec('LISTEN "rikudou_event"');
         while (true) {
             $result = $this->pdo->pgsqlGetNotify(PDO::FETCH_ASSOC, 1_000);
