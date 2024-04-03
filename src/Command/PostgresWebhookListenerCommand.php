@@ -47,7 +47,18 @@ final class PostgresWebhookListenerCommand extends Command
                 }
                 continue;
             }
-            $payload = json_decode($result['payload'], true);
+            if (is_numeric($result['payload'])) {
+                $query = $this->pdo->prepare('select payload from rikudou_webhooks_large_payloads where id = :id');
+                $query->bindParam('id', $result['payload']);
+                $query->execute();
+                $payload = $query->fetch(PDO::FETCH_ASSOC);
+                $payload = json_decode($payload['payload'], true);
+                $query = $this->pdo->prepare('delete from rikudou_webhooks_large_payloads where id = :id');
+                $query->bindParam('id', $result['payload']);
+                $query->execute();
+            } else {
+                $payload = json_decode($result['payload'], true);
+            }
             $data = $this->parser->parse($payload);
 
             if ($this->duplicateChecker->isDuplicate($data)) {
