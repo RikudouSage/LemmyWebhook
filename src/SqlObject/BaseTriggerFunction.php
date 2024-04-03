@@ -4,7 +4,7 @@ namespace App\SqlObject;
 
 use Doctrine\DBAL\Connection;
 
-final readonly class BaseTriggerFunction implements InstallableSqlObject
+final readonly class BaseTriggerFunction implements InstallableSqlObject, DependentInstallableObject
 {
     public function getName(): string
     {
@@ -23,6 +23,7 @@ final readonly class BaseTriggerFunction implements InstallableSqlObject
                 column_name   TEXT;
                 column_value  TEXT;
                 payload_items jsonb := '{}'::jsonb;
+                result_id     int;
             BEGIN
                 CASE TG_OP
                     WHEN 'INSERT','UPDATE' THEN rec := NEW;
@@ -44,8 +45,12 @@ final readonly class BaseTriggerFunction implements InstallableSqlObject
             
                 payload := json_build_object('timestamp', CURRENT_TIMESTAMP, 'operation', TG_OP, 'schema', TG_TABLE_SCHEMA, 'table',
                                              TG_TABLE_NAME, 'data', payload_items);
-            
-                PERFORM pg_notify('rikudou_event', payload);
+                if octet_length(payload) > 8000 then
+                    insert into rikudou_webhooks_large_payloads(payload) values (payload) returning id into result_id;
+                    PERFORM pg_notify('rikudou_event', result_id::text);
+                else
+                    PERFORM pg_notify('rikudou_event', payload);
+                end if;
             
                 RETURN rec;
             END;
@@ -57,5 +62,12 @@ final readonly class BaseTriggerFunction implements InstallableSqlObject
     public function uninstall(Connection $connection): void
     {
         $connection->executeStatement("drop function {$this->getName()}");
+    }
+
+    public function getDependencies(): array
+    {
+        return [
+            LargePayloadTable::class,
+        ];
     }
 }

@@ -10,6 +10,7 @@ use App\Service\ExpressionParser;
 use App\Service\RawWebhookParser;
 use Doctrine\ORM\EntityManagerInterface;
 use PDO;
+use PDOException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,6 +39,9 @@ final class PostgresWebhookListenerCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        try {
+            $this->pdo->exec('delete from rikudou_webhooks_large_payloads');
+        } catch (PDOException) {}
         $this->pdo->exec('LISTEN "rikudou_event"');
         while (true) {
             $result = $this->pdo->pgsqlGetNotify(PDO::FETCH_ASSOC, 1_000);
@@ -47,7 +51,18 @@ final class PostgresWebhookListenerCommand extends Command
                 }
                 continue;
             }
-            $payload = json_decode($result['payload'], true);
+            if (is_numeric($result['payload'])) {
+                $query = $this->pdo->prepare('select payload from rikudou_webhooks_large_payloads where id = :id');
+                $query->bindParam('id', $result['payload']);
+                $query->execute();
+                $payload = $query->fetch(PDO::FETCH_ASSOC);
+                $payload = json_decode($payload['payload'], true);
+                $query = $this->pdo->prepare('delete from rikudou_webhooks_large_payloads where id = :id');
+                $query->bindParam('id', $result['payload']);
+                $query->execute();
+            } else {
+                $payload = json_decode($result['payload'], true);
+            }
             $data = $this->parser->parse($payload);
 
             if ($this->duplicateChecker->isDuplicate($data)) {
