@@ -38,6 +38,7 @@ final class PostgresWebhookListenerCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        $this->pdo->exec('delete from rikudou_webhooks_large_payloads');
         $this->pdo->exec('LISTEN "rikudou_event"');
         while (true) {
             $result = $this->pdo->pgsqlGetNotify(PDO::FETCH_ASSOC, 1_000);
