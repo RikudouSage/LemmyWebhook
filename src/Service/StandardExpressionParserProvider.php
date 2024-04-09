@@ -54,8 +54,8 @@ final readonly class StandardExpressionParserProvider implements ExpressionFunct
                     }
 
                     $parts = explode('.', $path);
-                    $secondToLast = $parts[count($parts) - 1];
-                    if ($secondToLast === '0') {
+                    $secondToLast = $parts[count($parts) - 2] ?? null;
+                    if ($secondToLast === '0' || $secondToLast === null) {
                         return null;
                     }
 

@@ -10,6 +10,7 @@ use DateTimeImmutable;
 use DateTimeInterface;
 use LogicException;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionIntersectionType;
 use ReflectionNamedType;
 use ReflectionObject;
@@ -59,7 +60,14 @@ final readonly class RawWebhookParser
             $propertyName = preg_replace_callback('@_([a-z0-9])@', function (array $matches) {
                 return strtoupper($matches[1]);
             }, $key);
-            $propertyReflection = $reflection->getProperty($propertyName);
+            try {
+                $propertyReflection = $reflection->getProperty($propertyName);
+            } catch (ReflectionException $e) {
+                if (str_ends_with($e->getMessage(), 'does not exist')) {
+                    continue;
+                }
+                throw $e;
+            }
             $targetValue = $this->parseValue($value, $propertyReflection->getType());
             $propertyReflection->setValue($object, $targetValue);
         }

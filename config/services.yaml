@@ -45,3 +45,6 @@ services:
         arguments:
             $connection: '@doctrine.dbal.lemmy_connection'
     Rikudou\MemoizeBundle\Cache\InMemoryCachePool:
+    App\Command\DebugExpressionCommand:
+        arguments:
+            $expressionParser: '@app.expression_parser.enhanced'
