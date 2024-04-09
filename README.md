@@ -105,7 +105,8 @@ This is an example data object:
     "local": true,
     "distinguished": false,
     "path": "0.123.456"
-  }
+  },
+  "previous": null
 }
 ```
 
@@ -129,6 +130,9 @@ based on what you're being notified about. Here's a list of all `table` values c
 - `private_message_report` - [PrivateMessageReportData](src/Dto/RawData/PrivateMessageReportData.php)
 - `local_user` - [LocalUserData](src/Dto/RawData/LocalUserData.php)
 
+If the operation is an UPDATE, you'll also get access to the `previous` property which contains the data from the previous version of the object.
+If the operation is not an UPDATE, the `previous` property is `null`.
+
 ### Basic vs enhanced expressions
 
 There are two kinds of expressions, basic and enhanced. Enhanced expressions have access to additional functions
@@ -137,14 +141,15 @@ a few simple functions.
 
 Simple expressions have access to these functions:
 
-- `string_contains(stringToSearchIn, stringToSearchFor)` - returns true if the `stringToSearchIn` contains `stringToSearchFor`
-  - example filter expression: `string_contains(data.data.content, '@my_bot@my_instance')` - returns true if the comment text contains the text `@my_bot@my_instance`, basically only reacting to a mention of a bot 
 - `lowercase(text)` - returns the string converted to lowercase
 - `transliterate(text)` - returns the string transliterated to standard latin characters:
   - example: `transliterate("Hélľö, hów ärě ýöů?")` -> `Hello, how are you?`
   - example: `transliterate("𝐻𝐞𝒍𝓁𝓸 𝔱𝕙𝖊𝗋𝚎!")` -> `Hello there!`
 - `merge(arrayOrDictionary1, arrayOrDictionary2, ..., arrayOrDictionaryN)` - recursively merges an arbitrary number of arrays or dictionaries
 - `comment_parent_id(commentOrPath)` - returns the comment's parent id as an integer or null if it's a top level comment, can accept either the whole comment data object, or just the path
+
+> Note: Previous version contained the function `string_contains`. The function still exists for backwards compatibility, but shouldn't be used for new stuff, instead use the built-in `contains` like this:
+> `"some string" contains "another string"`, e.g. `data.data.content contains '@my_bot@my_instance'`
 
 Enhanced expressions, in addition to the above, have access to these functions:
 
@@ -183,7 +188,11 @@ it will be first filtered based on `filter_expression` on the main thread and th
 
 #### Contains a specific user mention (case-insensitive)
 
-`string_contains(lowercase(data.data.content), "@chatgpt@lemmings.world")` (I use that one for my ChatGPT bot)
+`lowercase(data.data.content) contains "@chatgpt@lemmings.world"` (I use that one for my ChatGPT bot)
+
+#### Only if the text changed on UPDATE
+
+`data.data.content !== data.previous.content`
 
 ### Example body expressions
 
