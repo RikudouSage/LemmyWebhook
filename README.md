@@ -194,6 +194,12 @@ it will be first filtered based on `filter_expression` on the main thread and th
 
 `data.data.content !== data.previous.content`
 
+#### The comment's hierarchy has been resolved
+
+> Lemmy first creates the comment with placeholder values, for example `path` is always `0` for INSERT. You can use this expression to only trigger when the final path has been resolved.
+
+`data.data.path !== data.previous.path`
+
 ### Example body expressions
 
 #### Pass the whole object
