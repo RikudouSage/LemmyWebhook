@@ -103,7 +103,8 @@ This is an example data object:
     "deleted": false,
     "apId": "http://changeme.invalid/52570b072a832e6a986330de",
     "local": true,
-    "distinguished": false
+    "distinguished": false,
+    "path": "0.123.456"
   }
 }
 ```
@@ -143,6 +144,7 @@ Simple expressions have access to these functions:
   - example: `transliterate("Hélľö, hów ärě ýöů?")` -> `Hello, how are you?`
   - example: `transliterate("𝐻𝐞𝒍𝓁𝓸 𝔱𝕙𝖊𝗋𝚎!")` -> `Hello there!`
 - `merge(arrayOrDictionary1, arrayOrDictionary2, ..., arrayOrDictionaryN)` - recursively merges an arbitrary number of arrays or dictionaries
+- `comment_parent_id(commentOrPath)` - returns the comment's parent id as an integer or null if it's a top level comment, can accept either the whole comment data object, or just the path
 
 Enhanced expressions, in addition to the above, have access to these functions:
 
