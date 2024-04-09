@@ -13,6 +13,8 @@ Add efficient webhook support to your Lemmy instance. Especially useful for bots
       * [Only non-local users](#only-non-local-users)
       * [Only specific user](#only-specific-user)
       * [Contains a specific user mention (case-insensitive)](#contains-a-specific-user-mention-case-insensitive)
+      * [Only if the text changed on UPDATE](#only-if-the-text-changed-on-update)
+      * [The comment's hierarchy has been resolved](#the-comments-hierarchy-has-been-resolved)
     * [Example body expressions](#example-body-expressions)
       * [Pass the whole object](#pass-the-whole-object)
       * [Post title and whether the post contains URL](#post-title-and-whether-the-post-contains-url)
