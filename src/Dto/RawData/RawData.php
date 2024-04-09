@@ -19,4 +19,9 @@ final readonly class RawData
      * @var TData
      */
     public object $data;
+
+    /**
+     * @var TData|null
+     */
+    public ?object $previous;
 }

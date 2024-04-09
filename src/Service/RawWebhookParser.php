@@ -35,13 +35,21 @@ final readonly class RawWebhookParser
     public function parse(array $raw): RawData
     {
         $data = $raw['data'] ?? [];
-        unset($raw['data']);
+        $previous = $raw['previous'] ?? null;
+        unset($raw['data'], $raw['previous']);
+
 
         $rawObject = $this->deserialize($raw, RawData::class);
-        $dataObject = $this->deserialize($data, $this->findTypeObjectClass($rawObject->table));
+
+        $objectTypeClass = $this->findTypeObjectClass($rawObject->table);
+
+        $dataObject = $this->deserialize($data, $objectTypeClass);
+        $previousObject = $previous === null ? null : $this->deserialize($previous, $objectTypeClass);
 
         $dataProperty = new ReflectionProperty(RawData::class, 'data');
         $dataProperty->setValue($rawObject, $dataObject);
+        $previousProperty = new ReflectionProperty(RawData::class, 'previous');
+        $previousProperty->setValue($rawObject, $previousObject);
 
         return $rawObject;
     }

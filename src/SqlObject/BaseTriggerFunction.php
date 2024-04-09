@@ -23,6 +23,7 @@ final readonly class BaseTriggerFunction implements InstallableSqlObject, Depend
                 column_name   TEXT;
                 column_value  TEXT;
                 payload_items jsonb := '{}'::jsonb;
+                previous      jsonb := '{}'::jsonb;
                 result_id     int;
             BEGIN
                 CASE TG_OP
@@ -42,9 +43,27 @@ final readonly class BaseTriggerFunction implements InstallableSqlObject, Depend
                 ELSE
                     payload_items := to_jsonb(rec);
                 END IF;
+                
+                IF TG_OP = 'UPDATE' THEN 
+                    IF TG_ARGV[0] IS NOT NULL THEN
+                        FOREACH column_name IN ARRAY TG_ARGV
+                            LOOP
+                                EXECUTE format('SELECT $1.%I::TEXT', column_name)
+                                    INTO column_value
+                                    USING OLD;
+                                previous := previous || jsonb_build_object(column_name, column_value);
+                            END LOOP;
+                    ELSE
+                        previous := to_jsonb(OLD);
+                    END IF;
+                END IF;
             
-                payload := json_build_object('timestamp', CURRENT_TIMESTAMP, 'operation', TG_OP, 'schema', TG_TABLE_SCHEMA, 'table',
-                                             TG_TABLE_NAME, 'data', payload_items);
+                IF TG_OP = 'UPDATE' THEN
+                    payload := json_build_object('timestamp', CURRENT_TIMESTAMP, 'operation', TG_OP, 'schema', TG_TABLE_SCHEMA, 'table', TG_TABLE_NAME, 'data', payload_items, 'previous', previous);
+                ELSE
+                    payload := json_build_object('timestamp', CURRENT_TIMESTAMP, 'operation', TG_OP, 'schema', TG_TABLE_SCHEMA, 'table', TG_TABLE_NAME, 'data', payload_items);
+                END IF;
+                
                 if octet_length(payload) > 8000 then
                     insert into rikudou_webhooks_large_payloads(payload) values (payload) returning id into result_id;
                     PERFORM pg_notify('rikudou_event', result_id::text);
