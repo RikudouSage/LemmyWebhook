@@ -16,4 +16,5 @@ final readonly class CommentData
     public string $apId;
     public bool $local;
     public bool $distinguished;
+    public string $path;
 }

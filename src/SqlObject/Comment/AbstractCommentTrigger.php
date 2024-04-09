@@ -23,6 +23,7 @@ abstract readonly class AbstractCommentTrigger extends AbstractTableTrigger
             'ap_id',
             'local',
             'distinguished',
+            'path',
         ];
     }
 }

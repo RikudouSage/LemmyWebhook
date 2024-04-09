@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Dto\RawData\CommentData;
 use DateTimeInterface;
 use LogicException;
 use Override;
@@ -44,6 +45,23 @@ final readonly class StandardExpressionParserProvider implements ExpressionFunct
                     return array_merge_recursive(...$arrays);
                 },
             ),
+            new ExpressionFunction(
+                'comment_parent_id',
+                fn () => throw new LogicException('This function cannot be compiled.'),
+                function (array $context, CommentData|string $path): ?int {
+                    if (!is_string($path)) {
+                        $path = $path->path;
+                    }
+
+                    $parts = explode('.', $path);
+                    $secondToLast = $parts[count($parts) - 1];
+                    if ($secondToLast === '0') {
+                        return null;
+                    }
+
+                    return (int) $secondToLast;
+                }
+            )
         ];
     }
 
