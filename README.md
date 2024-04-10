@@ -72,6 +72,7 @@ The table is quite simple and consists of these fields:
   - `registration_application`
   - `private_message_report`
   - `local_user`
+  - `community_follower` - a subscription by a user to a community
 - `operation` (optional) - the kind of operation this webhook is interested in, can be `INSERT`, `UPDATE`, `DELETE` (taken from the [DatabaseOperation](src/Enum/DatabaseOperation.php) enum)
 - `headers` (optional) - a JSON object with keys as header names and values as header values
 - `enhanced_filter` (optional) - an expression that must evaluate to true if this webhook is to run, more on expressions below
@@ -131,6 +132,7 @@ based on what you're being notified about. Here's a list of all `table` values c
 - `registration_application` - [RegistrationApplicationData](src/Dto/RawData/RegistrationApplicationData.php)
 - `private_message_report` - [PrivateMessageReportData](src/Dto/RawData/PrivateMessageReportData.php)
 - `local_user` - [LocalUserData](src/Dto/RawData/LocalUserData.php)
+- `community_follower` - [CommunitySubscriptionData](src/Dto/RawData/CommunitySubscriptionData.php)
 
 If the operation is an UPDATE, you'll also get access to the `previous` property which contains the data from the previous version of the object.
 If the operation is not an UPDATE, the `previous` property is `null`.
