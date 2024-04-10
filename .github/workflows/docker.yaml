@@ -31,8 +31,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Setup php dependencies
-        run: composer install --no-dev --no-scripts
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
