@@ -10,9 +10,9 @@ on:
 
 jobs:
   publish:
-    strategy:
-      matrix:
-        arch: [amd64, arm64]
+#    strategy:
+#      matrix:
+#        arch: [amd64, arm64]
     runs-on: ubuntu-latest
     steps:
       - name: Setup PHP
@@ -46,7 +46,7 @@ jobs:
         with:
           context: .
           file: docker/Dockerfile
-          platforms: linux/${{ matrix.arch }}
+          platforms: linux/arm64,linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
