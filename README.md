@@ -164,6 +164,7 @@ Enhanced expressions, in addition to the above, have access to these functions:
 - `comment(commentId)` - returns the [CommentData](src/Dto/RawData/CommentData.php) DTO for a comment with given ID (or null if no such comment exists)
 - `local_user(userId)` - returns the [LocalUserData](src/Dto/RawData/LocalUserData.php) DTO for a local user with given ID (or null if no such user exists)
 - `private_message(privateMessageId)` - returns the [PrivateMessageData](src/Dto/RawData/PrivateMessageData.php) DTO for a private message with given ID (or null if no such private message exists)
+- `global_ban(personId)` - returns a [ModBanData](src/Dto/RawData/ModBanData.php) DTO for the given user or `null` if no ban exists
 
 > note that in all the cases above, null will also be returned if you don't have permission to access any of the given object types
 
@@ -213,6 +214,10 @@ it will be first filtered based on `filter_expression` on the main thread and th
 #### Post title and whether the post contains URL
 
 `{title: data.data.name, hasUrl: data.data.url !== null}`
+
+#### The user's id and their ban reason (or null if no ban reason or user not banned)
+
+`{id: data.data.id, banReason: global_ban(data.data.id)?.reason}`
 
 ### Title, community and instance
 

@@ -8,6 +8,7 @@ use App\Service\ExpressionParser;
 use App\Service\RawWebhookParser;
 use DateTimeImmutable;
 use PDO;
+use stdClass;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -59,13 +60,15 @@ class DebugExpressionCommand extends Command
             'table' => $targetType,
         ];
 
-        $statement = $this->pdo->query("select * from {$targetType} where id = {$targetId}");
-        $result = $statement->fetch(PDO::FETCH_ASSOC);
-        $rawData['data'] = $result;
-        $object = $this->rawWebhookParser->parse($rawData);
+        if ($targetType && $targetId) {
+            $statement = $this->pdo->query("select * from {$targetType} where id = {$targetId}");
+            $result = $statement->fetch(PDO::FETCH_ASSOC);
+            $rawData['data'] = $result;
+            $object = $this->rawWebhookParser->parse($rawData);
+        }
 
         $value = $this->expressionParser->evaluate($expression, [
-            'data' => $object,
+            'data' => $object ?? new stdClass(),
             'triggering_user' => null,
         ]);
 

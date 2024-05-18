@@ -6,6 +6,7 @@ use App\Dto\RawData\CommentData;
 use App\Dto\RawData\CommunityData;
 use App\Dto\RawData\InstanceData;
 use App\Dto\RawData\LocalUserData;
+use App\Dto\RawData\ModBanData;
 use App\Dto\RawData\PersonData;
 use App\Dto\RawData\PostData;
 use App\Dto\RawData\PrivateMessageData;
@@ -120,7 +121,19 @@ final readonly class EnhancedExpressionParserProvider implements ExpressionFunct
                     fields: $this->privateMessageTrigger->getFields(),
                     class: PrivateMessageData::class,
                 ),
-            )
+            ),
+            new ExpressionFunction(
+                'global_ban',
+                fn () => throw new LogicException('This function cannot be compiled.'),
+                fn (array $context, int $personId): ?ModBanData => $this->getDto(
+                    table: 'mod_ban',
+                    triggeringUser: $context['triggering_user'],
+                    id: $personId,
+                    fields: ['id', 'mod_person_id', 'other_person_id', 'reason', 'banned', 'expires', 'when_'],
+                    class: ModBanData::class,
+                    idField: 'other_person_id',
+                ),
+            ),
         ];
     }
 
@@ -130,7 +143,7 @@ final readonly class EnhancedExpressionParserProvider implements ExpressionFunct
      * @param class-string<TDto> $class
      * @return TDto|null
      */
-    private function getDto(string $table, ?int $triggeringUser, int $id, array $fields, string $class): ?object
+    private function getDto(string $table, ?int $triggeringUser, int $id, array $fields, string $class, ?string $idField = 'id'): ?object
     {
         $fields = implode(',', $fields);
         $cacheItem = $this->inMemoryCache->getItem("dto.{$table}.{$triggeringUser}.{$id}.{$fields}.{$class}");
@@ -141,7 +154,7 @@ final readonly class EnhancedExpressionParserProvider implements ExpressionFunct
         if (!$this->doesHaveAccess($table, $triggeringUser)) {
             return null;
         }
-        $data = $this->connection->executeQuery("select {$fields} from {$table} where id = :id", ['id' => $id])->fetchAssociative();
+        $data = $this->connection->executeQuery("select {$fields} from {$table} where {$idField} = :id", ['id' => $id])->fetchAssociative();
         if ($data === false) {
             return null;
         }
