@@ -68,6 +68,9 @@ final readonly class RawWebhookParser
             $propertyName = preg_replace_callback('@_([a-z0-9])@', function (array $matches) {
                 return strtoupper($matches[1]);
             }, $key);
+            if (str_ends_with($propertyName, '_')) {
+                $propertyName = substr($propertyName, 0, -1);
+            }
             try {
                 $propertyReflection = $reflection->getProperty($propertyName);
             } catch (ReflectionException $e) {
