@@ -18,6 +18,7 @@ Add efficient webhook support to your Lemmy instance. Especially useful for bots
     * [Example body expressions](#example-body-expressions)
       * [Pass the whole object](#pass-the-whole-object)
       * [Post title and whether the post contains URL](#post-title-and-whether-the-post-contains-url)
+      * [The user's id and their ban reason (or null if no ban reason or user not banned)](#the-users-id-and-their-ban-reason-or-null-if-no-ban-reason-or-user-not-banned)
     * [Title, community and instance](#title-community-and-instance)
     * [Comment ID and a custom string](#comment-id-and-a-custom-string)
     * [Example enhanced filters](#example-enhanced-filters)
