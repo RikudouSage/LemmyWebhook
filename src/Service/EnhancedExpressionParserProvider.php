@@ -143,7 +143,7 @@ final readonly class EnhancedExpressionParserProvider implements ExpressionFunct
      * @param class-string<TDto> $class
      * @return TDto|null
      */
-    private function getDto(string $table, ?int $triggeringUser, int $id, array $fields, string $class, ?string $idField = 'id'): ?object
+    private function getDto(string $table, ?int $triggeringUser, int $id, array $fields, string $class, string $idField = 'id'): ?object
     {
         $fields = implode(',', $fields);
         $cacheItem = $this->inMemoryCache->getItem("dto.{$table}.{$triggeringUser}.{$id}.{$fields}.{$class}");
