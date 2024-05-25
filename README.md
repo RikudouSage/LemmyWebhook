@@ -46,6 +46,7 @@ services:
       - LEMMY_PASSWORD=superSecr3t # the password to the postgres database
       - API_REGISTRATION_ENABLED=1 # whether to allow users to register themselves via the api
       - CORS_ALLOW_ORIGIN=^.*$$ # a regex for cors (you need to escape $ with another $)
+      - LARGE_PAYLOAD_SIZE=1024 # payloads larger than this size (in bytes) will be stored in a temporary table instead of fed directly to the consumer, default is 4096. If set to 0, all payloads will be stored.
     ports:
       - 8080:80 # you can skip this, if you don't use the management api
     volumes:
@@ -53,6 +54,8 @@ services:
 ```
 
 Afterwards, run `docker-compose up -d` and you're done!
+
+> The `LARGE_PAYLOAD_SIZE` is important to avoid "payload string too long" errors in Postgres. By default, Postgres allows 8000 bytes in the payload.
 
 ## Usage
 
