@@ -3,9 +3,16 @@
 namespace App\SqlObject;
 
 use Doctrine\DBAL\Connection;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 final readonly class BaseTriggerFunction implements InstallableSqlObject, DependentInstallableObject
 {
+    public function __construct(
+        #[Autowire('%app.large_payload_size%')]
+        private int $largePayloadSize,
+    ) {
+    }
+
     public function getName(): string
     {
         return 'rikudou_notify_trigger';
@@ -64,7 +71,7 @@ final readonly class BaseTriggerFunction implements InstallableSqlObject, Depend
                     payload := json_build_object('timestamp', CURRENT_TIMESTAMP, 'operation', TG_OP, 'schema', TG_TABLE_SCHEMA, 'table', TG_TABLE_NAME, 'data', payload_items);
                 END IF;
                 
-                if octet_length(payload) > 0 then
+                if octet_length(payload) > {$this->largePayloadSize} then
                     insert into rikudou_webhooks_large_payloads(payload) values (payload) returning id into result_id;
                     PERFORM pg_notify('rikudou_event', result_id::text);
                 else

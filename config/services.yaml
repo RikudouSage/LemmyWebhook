@@ -5,6 +5,7 @@
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
     app.auth.api_registration_enabled: '%env(bool:API_REGISTRATION_ENABLED)%'
+    app.large_payload_size: '%env(int:LARGE_PAYLOAD_SIZE)%'
 
 services:
     # default configuration for services in *this* file
