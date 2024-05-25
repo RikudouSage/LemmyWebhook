@@ -56,6 +56,7 @@ services:
 Afterwards, run `docker-compose up -d` and you're done!
 
 > The `LARGE_PAYLOAD_SIZE` is important to avoid "payload string too long" errors in Postgres. By default, Postgres allows 8000 bytes in the payload.
+> You can set this to 0 to send every payload into the table first.
 
 ## Usage
 
