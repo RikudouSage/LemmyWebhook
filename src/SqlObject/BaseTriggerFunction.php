@@ -64,7 +64,7 @@ final readonly class BaseTriggerFunction implements InstallableSqlObject, Depend
                     payload := json_build_object('timestamp', CURRENT_TIMESTAMP, 'operation', TG_OP, 'schema', TG_TABLE_SCHEMA, 'table', TG_TABLE_NAME, 'data', payload_items);
                 END IF;
                 
-                if octet_length(payload) > 8000 then
+                if octet_length(payload) > 0 then
                     insert into rikudou_webhooks_large_payloads(payload) values (payload) returning id into result_id;
                     PERFORM pg_notify('rikudou_event', result_id::text);
                 else
