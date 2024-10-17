@@ -13,7 +13,7 @@ RUN apt-get update && \
     apt-get -y install libxml2-dev libonig-dev libpq-dev supervisor tini unzip && \
     rm -rf /var/lib/apt/lists/*
 RUN docker-php-ext-install intl opcache pcntl pdo pdo_pgsql && \
-    pecl install redis && \
+    pecl install redis-6.0.2 && \
     docker-php-ext-enable redis
 RUN a2enmod rewrite
 
