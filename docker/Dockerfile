@@ -27,6 +27,7 @@ RUN curl https://getcomposer.org/installer -o /tmp/composer-installer && \
     chmod +x composer.phar && \
     mv composer.phar /usr/local/bin/composer && \
     rm -rf var vendor && \
+    mkdir var && \
     COMPOSER_ALLOW_SUPERUSER=1 composer install --no-scripts --no-dev -o -a && \
     rm -rf /usr/local/bin/composer && \
     rm -rf /tmp/composer-installer && \
