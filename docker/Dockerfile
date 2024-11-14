@@ -10,9 +10,9 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-av
     sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 RUN apt-get update && \
-    apt-get -y install libxml2-dev libonig-dev libpq-dev supervisor tini unzip && \
+    apt-get -y install libxml2-dev libonig-dev libpq-dev libsqlite3-dev supervisor tini unzip && \
     rm -rf /var/lib/apt/lists/*
-RUN docker-php-ext-install intl opcache pcntl pdo pdo_pgsql && \
+RUN docker-php-ext-install intl opcache pcntl pdo pdo_pgsql pdo_sqlite && \
     pecl install redis-6.0.2 && \
     docker-php-ext-enable redis
 RUN a2enmod rewrite
@@ -27,7 +27,6 @@ RUN curl https://getcomposer.org/installer -o /tmp/composer-installer && \
     chmod +x composer.phar && \
     mv composer.phar /usr/local/bin/composer && \
     rm -rf var vendor && \
-    mkdir var && \
     COMPOSER_ALLOW_SUPERUSER=1 composer install --no-scripts --no-dev -o -a && \
     rm -rf /usr/local/bin/composer && \
     rm -rf /tmp/composer-installer && \
@@ -41,6 +40,7 @@ RUN curl https://getcomposer.org/installer -o /tmp/composer-installer && \
     COMPOSER_ALLOW_SUPERUSER=1 composer dump-autoload -o -a && \
     rm -rf /usr/local/bin/composer && \
     rm -rf /tmp/composer-installer && \
+    mkdir -p /opt/database && chown 33:33 /opt/database && \
     php bin/console cache:clear && \
     php bin/console cache:warmup && \
     chown -R 33:33 var
