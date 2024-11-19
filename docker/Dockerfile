@@ -10,11 +10,12 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-av
     sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
 RUN apt-get update && \
-    apt-get -y install libxml2-dev libonig-dev libpq-dev libsqlite3-dev supervisor tini unzip && \
+    apt-get -y install libonig-dev libpq-dev librabbitmq-dev libsqlite3-dev libxml2-dev supervisor tini unzip && \
     rm -rf /var/lib/apt/lists/*
 RUN docker-php-ext-install intl opcache pcntl pdo pdo_pgsql pdo_sqlite && \
     pecl install redis-6.0.2 && \
-    docker-php-ext-enable redis
+    pecl install amqp-2.1.2 && \
+    docker-php-ext-enable amqp redis
 RUN a2enmod rewrite
 
 WORKDIR /var/www/html
