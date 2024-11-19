@@ -51,6 +51,11 @@ RUN mkdir /opt/runtime-cache && \
     mkdir /opt/logs && \
     mkdir /opt/uploaded-files && \
     chown 33:33 /opt/* && \
-    chmod +x /var/www/html/docker/entrypoint.bash
+    chmod +x /var/www/html/docker/entrypoint.bash && \
+    mkdir /var/run/supervisor && \
+    chown www-data:www-data /var/log/supervisor/ /var/run/supervisor && \
+    sed -i 's|/var/run/|/var/run/supervisor/|g' /etc/supervisor/supervisord.conf
+
+USER 33:33
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/var/www/html/docker/entrypoint.bash"]
