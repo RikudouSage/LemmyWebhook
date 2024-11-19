@@ -21,6 +21,7 @@
         "rikudou/json-api-bundle": "^2.9",
         "rikudou/lemmy-api": "^0.4.0",
         "rikudou/memoize-bundle": "^1.1",
+        "symfony/amqp-messenger": "^7.0",
         "symfony/apache-pack": "^1.0",
         "symfony/console": "^7.0",
         "symfony/dotenv": "^7.0",

@@ -262,3 +262,41 @@ So, this is a full SQL insert for getting only new local posts using a POST requ
 INSERT INTO webhooks (url, method, body_expression, filter_expression, object_type, operation, headers, enhanced_filter)
 VALUES ('https://example.com/webhook', 'POST', 'data.data', 'data.data.local', 'comment', 'INSERT', null, null);
 ```
+
+## RabbitMQ example
+
+You can use RabbitMQ as a queue instead of Redis:
+
+> This is the example from the top of this README modified to include RabbitMQ
+
+```yaml
+services:
+  # ...
+  redis:
+    image: redis
+    ports:
+      - 6379:6379
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    ports: # you don't need to bind ports if you don't want to
+      - 5672:5672
+      - 15672:15672
+
+  webhooks:
+    image: ghcr.io/rikudousage/lemmy-webhook:latest
+    environment:
+      - LEMMY_HOST=postgres
+      - REDIS_HOST=redis
+      - LEMMY_PASSWORD=superSecr3t
+      - API_REGISTRATION_ENABLED=1
+      - CORS_ALLOW_ORIGIN=^.*$$
+      - LARGE_PAYLOAD_SIZE=1024
+      - MESSENGER_TRANSPORT_DSN=amqp://guest:guest@rabbitmq:5672/%2f/lemmy_webhook_queue # read more at https://symfony.com/doc/current/messenger.html#amqp-transport
+    ports:
+      - 8080:80
+    volumes:
+      - ./volumes/database:/opt/database
+```
+
+
