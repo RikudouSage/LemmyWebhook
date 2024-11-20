@@ -272,7 +272,7 @@ You can use RabbitMQ as a queue instead of Redis:
 ```yaml
 services:
   # ...
-  redis:
+  redis: # Redis is still needed because it's used for cache
     image: redis
     ports:
       - 6379:6379
