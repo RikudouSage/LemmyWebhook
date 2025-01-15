@@ -24,6 +24,8 @@ Add efficient webhook support to your Lemmy instance. Especially useful for bots
     * [Example enhanced filters](#example-enhanced-filters)
       * [Check whether the comment is posted to a community on your instance](#check-whether-the-comment-is-posted-to-a-community-on-your-instance)
   * [Full example](#full-example)
+  * [RabbitMQ example](#rabbitmq-example)
+  * [For app developers](#for-app-developers)
 <!-- TOC -->
 
 ## Installation
@@ -299,4 +301,39 @@ services:
       - ./volumes/database:/opt/database
 ```
 
+## For app developers
 
+If you're developing an app that relies on these webhooks, you can create a config file with all your webhooks 
+that can easily be imported into the graphical UI.
+
+The config file is a yaml file which must have a top-level field `webhooks`, which is an array of the following properties:
+
+- `uniqueMachineName` - **required** - a unique name for the webhook. If you import a webhook with the same unique name,
+  it will overwrite the previous webhook instead of adding it
+- `url` - **required** - the target webhook URL
+- `method` - **required** - the HTTP method, must be one of the values in [RequestMethod](src/Enum/RequestMethod.php)
+- `objectType` - **required** - must be a valid object type
+- `operation` - **required** - the database operation to react to, must be one of the values in [DatabaseOperation](src/Enum/DatabaseOperation.php)
+- `bodyExpression`
+- `filterExpression`
+- `enhancedFilterExpression`
+- `headers`
+- `enabled` - whether the webhook is enabled or not
+
+For example:
+
+```yaml
+webhooks:
+  - uniqueMachineName: demo.some_webhook
+    url: https://example.com
+    method: POST
+    objectType: comment
+    operation: INSERT
+    bodyExpression: '{title: data.data.name, hasUrl: data.data.url !== null}'
+    filterExpression: data.data.local
+    enhancedFilterExpression: "instance(community(post(data.data.postId).communityId).instanceId).domain === 'my.instance.org'"
+    headers:
+      X-Custom-Header: Some-value
+      Accept: application/json
+    enabled: true
+```
