@@ -13,7 +13,7 @@ RUN apt-get update && \
     apt-get -y install libonig-dev libpq-dev librabbitmq-dev libsqlite3-dev libxml2-dev supervisor tini unzip && \
     rm -rf /var/lib/apt/lists/*
 RUN docker-php-ext-install intl opcache pcntl pdo pdo_pgsql pdo_sqlite && \
-    pecl install redis-6.0.2 && \
+    pecl install redis-6.1.0 && \
     pecl install amqp-2.1.2 && \
     docker-php-ext-enable amqp redis
 RUN a2enmod rewrite
