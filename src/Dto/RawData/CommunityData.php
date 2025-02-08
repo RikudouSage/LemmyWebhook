@@ -17,5 +17,6 @@ final readonly class CommunityData
     public string $actorId;
     public bool $local;
     public bool $hidden;
+    public bool $postingRestrictedToMods;
     public int $instanceId;
 }
