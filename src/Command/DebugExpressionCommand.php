@@ -44,6 +44,7 @@ class DebugExpressionCommand extends Command
             ->addOption('timestamp', mode: InputOption::VALUE_REQUIRED, default: (new DateTimeImmutable())->format('c'))
             ->addOption('operation', mode: InputOption::VALUE_REQUIRED, default: 'INSERT')
             ->addOption('schema', mode: InputOption::VALUE_REQUIRED, default: 'public')
+            ->addOption('triggering-user', mode: InputOption::VALUE_REQUIRED)
         ;
     }
 
@@ -52,6 +53,7 @@ class DebugExpressionCommand extends Command
         $expression = $input->getArgument('expression');
         $targetType = $input->getArgument('target-type');
         $targetId = (int) $input->getArgument('target-id');
+        $triggeringUserId = $input->getOption('triggering-user');
 
         $rawData = [
             'timestamp' => (new DateTimeImmutable($input->getOption('timestamp')))->format('c'),
@@ -69,7 +71,7 @@ class DebugExpressionCommand extends Command
 
         $value = $this->expressionParser->evaluate($expression, [
             'data' => $object ?? new stdClass(),
-            'triggering_user' => null,
+            'triggering_user' => $triggeringUserId,
         ]);
 
         $output->writeln("Result:");
