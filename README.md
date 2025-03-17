@@ -171,6 +171,7 @@ Enhanced expressions, in addition to the above, have access to these functions:
 - `comment(commentId)` - returns the [CommentData](src/Dto/RawData/CommentData.php) DTO for a comment with given ID (or null if no such comment exists)
 - `local_user(userId)` - returns the [LocalUserData](src/Dto/RawData/LocalUserData.php) DTO for a local user with given ID (or null if no such user exists)
 - `private_message(privateMessageId)` - returns the [PrivateMessageData](src/Dto/RawData/PrivateMessageData.php) DTO for a private message with given ID (or null if no such private message exists)
+- `private_message_with_content(privateMessageId)` - returns the [PrivateMessageWithContentData](src/Dto/Model/PrivateMessageWithContentData.php) DTO for a private message with given ID. Be careful with this as it can contain sensitive data. If you use scopes, this function requires a separate scope (`private_message_content`) than the `private_message` function or webhook
 - `global_ban(personId)` - returns a [ModBanData](src/Dto/RawData/ModBanData.php) DTO for the given user or `null` if no ban exists
 
 > note that in all the cases above, null will also be returned if you don't have permission to access any of the given object types

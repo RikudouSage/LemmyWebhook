@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Dto\Model\PrivateMessageWithContentData;
 use App\Dto\RawData\CommentData;
 use App\Dto\RawData\CommunityData;
 use App\Dto\RawData\InstanceData;
@@ -123,6 +124,18 @@ final readonly class EnhancedExpressionParserProvider implements ExpressionFunct
                 ),
             ),
             new ExpressionFunction(
+                'private_message_with_content',
+                fn () => throw new LogicException('This function cannot be compiled.'),
+                fn (array $context, int $privateMessageId): ?PrivateMessageWithContentData => $this->getDto(
+                    table: $this->privateMessageTrigger->getTable(),
+                    triggeringUser: $context['triggering_user'],
+                    id: $privateMessageId,
+                    fields: [...$this->privateMessageTrigger->getFields(), 'content'],
+                    class: PrivateMessageWithContentData::class,
+                    permission: 'private_message_content',
+                ),
+            ),
+            new ExpressionFunction(
                 'global_ban',
                 fn () => throw new LogicException('This function cannot be compiled.'),
                 fn (array $context, int $personId): ?ModBanData => $this->getDto(
@@ -143,15 +156,17 @@ final readonly class EnhancedExpressionParserProvider implements ExpressionFunct
      * @param class-string<TDto> $class
      * @return TDto|null
      */
-    private function getDto(string $table, ?int $triggeringUser, int $id, array $fields, string $class, string $idField = 'id'): ?object
+    private function getDto(string $table, ?int $triggeringUser, int $id, array $fields, string $class, string $idField = 'id', ?string $permission = null): ?object
     {
+        $permission ??= $table;
+
         $fields = implode(',', $fields);
         $cacheItem = $this->inMemoryCache->getItem("dto.{$table}.{$triggeringUser}.{$id}.{$fields}.{$class}");
         if ($cacheItem->isHit()) {
             return $cacheItem->get();
         }
 
-        if (!$this->doesHaveAccess($table, $triggeringUser)) {
+        if (!$this->doesHaveAccess($permission, $triggeringUser)) {
             return null;
         }
         $data = $this->connection->executeQuery("select {$fields} from {$table} where {$idField} = :id", ['id' => $id])->fetchAssociative();
