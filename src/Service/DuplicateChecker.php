@@ -35,6 +35,7 @@ final readonly class DuplicateChecker
     private function getKey(RawData $object): string
     {
         assert(property_exists($object->data, 'id'));
-        return "webhooks.handled.{$object->schema}.{$object->table}.{$object->operation->value}.{$object->data->id}";
+        $hash = hash('sha512', serialize($object->data));
+        return "webhooks.handled.{$object->schema}.{$object->table}.{$object->operation->value}.{$hash}";
     }
 }
