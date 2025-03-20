@@ -7,23 +7,28 @@ use App\Message\CleanupExpiredRowsMessage;
 use App\Message\TriggerCallbackMessage;
 use App\Repository\WebhookRepository;
 use App\Service\ExpressionParser;
+use App\Service\Signer\WebhookSignerFactory;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use LogicException;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Stamp\DispatchAfterCurrentBusStamp;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[AsMessageHandler]
 final readonly class TriggerCallbackHandler
 {
+    private const string NAMESPACE = '71e6fa30-3fb7-419c-974b-b5b9a750e4f1';
+
     public function __construct(
         private HttpClientInterface $httpClient,
         private ExpressionParser $expressionParser,
         private MessageBusInterface $messageBus,
         private EntityManagerInterface $entityManager,
         private WebhookRepository $webhookRepository,
+        private WebhookSignerFactory $webhookSigner,
     ) {
     }
 
@@ -55,7 +60,24 @@ final readonly class TriggerCallbackHandler
 
         $bodyExpression = $webhook->getBodyExpression();
         if ($bodyExpression !== null) {
-            $requestOptions['json'] = $this->expressionParser->evaluate($bodyExpression, ['data' => $data, 'triggering_user' => $webhook->getUser()?->getId()]);
+            $requestOptions['body'] = json_encode($this->expressionParser->evaluate($bodyExpression, ['data' => $data, 'triggering_user' => $webhook->getUser()?->getId()]));
+        }
+
+        $requestOptions['headers']['webhook-id'] = (string) Uuid::v5(
+            Uuid::fromString(self::NAMESPACE),
+            base64_encode(
+                serialize($message->data) . serialize($message->webhook),
+            ),
+        );
+        $requestOptions['headers']['webhook-timestamp'] = time();
+
+        if ($signer = $this->webhookSigner->findSigner($webhook->getSigningMode())) {
+            $requestOptions['headers']['webhook-signature'] = $signer->sign(
+                signingKey: $webhook->getSigningKey() ?? throw new LogicException('Cannot sign webhook without a signing key'),
+                messageId: $requestOptions['headers']['webhook-id'],
+                body: $requestOptions['body'],
+                timestamp: $requestOptions['headers']['webhook-timestamp'],
+            );
         }
 
         $response = $this->httpClient->request(

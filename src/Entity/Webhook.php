@@ -13,6 +13,7 @@ use JetBrains\PhpStorm\ExpectedValues;
 use Rikudou\JsonApiBundle\Attribute\ApiProperty;
 use Rikudou\JsonApiBundle\Attribute\ApiResource;
 use Symfony\Component\HttpFoundation\Request;
+use \App\Enum\SigningMode;
 
 #[ApiResource]
 #[ORM\Entity(repositoryClass: WebhookRepository::class)]
@@ -78,6 +79,14 @@ class Webhook
     #[ApiProperty]
     #[ORM\Column(length: 180, nullable: true)]
     private ?string $uniqueMachineName = null;
+
+    #[ApiProperty(setter: 'setSigningModeAsString')]
+    #[ORM\Column(enumType: SigningMode::class)]
+    private SigningMode $signingMode = SigningMode::None;
+
+    #[ApiProperty]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $signingKey = null;
 
     public function __construct()
     {
@@ -273,6 +282,35 @@ class Webhook
     public function setUniqueMachineName(?string $uniqueMachineName): static
     {
         $this->uniqueMachineName = $uniqueMachineName;
+
+        return $this;
+    }
+
+    public function getSigningMode(): SigningMode
+    {
+        return $this->signingMode;
+    }
+
+    public function setSigningMode(SigningMode $signingMode): static
+    {
+        $this->signingMode = $signingMode;
+
+        return $this;
+    }
+
+    public function setSigningModeAsString(string $signingMode): static
+    {
+        return $this->setSigningMode(SigningMode::from($signingMode));
+    }
+
+    public function getSigningKey(): ?string
+    {
+        return $this->signingKey;
+    }
+
+    public function setSigningKey(?string $signingKey): static
+    {
+        $this->signingKey = $signingKey;
 
         return $this;
     }
