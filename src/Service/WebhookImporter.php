@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Entity\Webhook;
 use App\Enum\DatabaseOperation;
 use App\Enum\RequestMethod;
+use App\Enum\SigningMode;
 use App\Exception\InvalidImportException;
 use App\Repository\WebhookRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -69,6 +70,8 @@ final readonly class WebhookImporter
                 enhancedFilterExpression: $webhook['enhancedFilterExpression'] ?? null,
                 headers: $webhook['headers'] ?? null,
                 enabled: $webhook['enabled'] ?? true,
+                signingMode: SigningMode::tryFrom($webhook['signingMode'] ?? '') ?? SigningMode::None,
+                signingKey: $webhook['signingKey'] ?? null,
             );
 
             $webhookEntity = $this->webhookRepository->findOneBy([
@@ -90,6 +93,8 @@ final readonly class WebhookImporter
                 ->setFilterExpression($webhookDto->filterExpression)
                 ->setEnhancedFilter($webhookDto->enhancedFilterExpression)
                 ->setHeaders($webhookDto->headers)
+                ->setSigningMode($webhookDto->signingMode)
+                ->setSigningKey($webhookDto->signingKey)
             ;
             $this->entityManager->persist($webhookEntity);
         }
