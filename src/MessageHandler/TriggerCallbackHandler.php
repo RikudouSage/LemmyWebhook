@@ -87,11 +87,11 @@ final readonly class TriggerCallbackHandler
         );
 
         $responseLog = (new WebhookResponse())
-            ->setBody($response->getContent(false))
+            ->setBody($response->getContent($webhook->shouldRetryOnFailure()))
             ->setStatusCode($response->getStatusCode())
             ->setWebhook($webhook)
             ->setValidUntil(new DateTimeImmutable('+6 hours'))
-            ->setHeaders($response->getHeaders())
+            ->setHeaders($response->getHeaders($webhook->shouldRetryOnFailure()))
         ;
         if ($webhook->shouldLogResponses()) {
             $this->entityManager->persist($responseLog);
