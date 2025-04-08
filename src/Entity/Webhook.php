@@ -88,6 +88,9 @@ class Webhook
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $signingKey = null;
 
+    #[ORM\Column(options: ['default' => true])]
+    private bool $retryOnFailure = true;
+
     public function __construct()
     {
         $this->webhookResponses = new ArrayCollection();
@@ -311,6 +314,18 @@ class Webhook
     public function setSigningKey(?string $signingKey): static
     {
         $this->signingKey = $signingKey;
+
+        return $this;
+    }
+
+    public function shouldRetryOnFailure(): bool
+    {
+        return $this->retryOnFailure;
+    }
+
+    public function setRetryOnFailure(bool $retryOnFailure): static
+    {
+        $this->retryOnFailure = $retryOnFailure;
 
         return $this;
     }
