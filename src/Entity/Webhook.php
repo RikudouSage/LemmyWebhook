@@ -88,6 +88,7 @@ class Webhook
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $signingKey = null;
 
+    #[ApiProperty]
     #[ORM\Column(options: ['default' => true])]
     private bool $retryOnFailure = true;
 
